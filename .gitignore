@@ -1,0 +1,33 @@
+# Umgebungsvariablen
+.env
+
+# Temporaere Dateien
+.tmp/
+
+# Google OAuth Credentials
+credentials.json
+token.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (falls spaeter verwendet)
+node_modules/
+
+# Logs
+*.log
