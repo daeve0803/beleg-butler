@@ -67,6 +67,24 @@ Fehler sind Lernmoeglichkeiten. Wenn etwas kaputt geht:
 - `.env` - Umgebungsvariablen und API-Keys
 - `credentials.json`, `token.json` - Google OAuth-Anmeldedaten (erforderliche Dateien, in `.gitignore`)
 
+**Ralph-System (autonome Entwicklungsschleife):**
+- `.ralph/` - Bash-Skripte fuer autonomen Development-Loop
+  - `ralph_loop.sh` - Hauptskript, fuehrt Claude Code iterativ aus
+  - `ralph_monitor.sh` - Live-Dashboard fuer Status-Monitoring
+  - `ralph_import.sh` - Konvertiert PRDs zu Ralph-Format
+  - `setup.sh` - Erstellt neue Ralph-Projekte
+- `.ralph/lib/` - Wiederverwendbare Bibliotheken
+  - `circuit_breaker.sh` - Verhindert Endlosschleifen
+  - `response_analyzer.sh` - Analysiert Claude-Output auf Exit-Signale
+  - `date_utils.sh` - Cross-Platform Datum-Utilities
+- `.ralph/templates/` - Vorlagen fuer Ralph-Projekte (PROMPT.md, fix_plan.md, AGENT.md)
+
+**Claude-Erweiterungen:**
+- `.claude/agents/` - Subagent-Definitionen (reviewer, documenter, linkedin, ralph)
+- `.claude/commands/` - Benutzerdefinierte Befehle (z.B. `/push` fuer Git-Push)
+- `.claude/context/` - Session-Management fuer geteilten Kontext zwischen Subagents
+- `.claude/hooks/` - Event-basierte Automatisierungen (z.B. SessionStart-Reminder)
+
 **Kernprinzip:** Lokale Dateien sind nur fuer die Verarbeitung. Ergebnisse leben in Cloud-Diensten (Google Sheets, Slides etc.), wo der Benutzer darauf zugreifen kann. Alles in `.tmp/` kann geloescht und regeneriert werden.
 
 ## Cloud-Webhooks (Modal)
@@ -123,6 +141,19 @@ Du hast spezialisierte Subagents in `.claude/agents/`, die du VERWENDEN MUSST:
 **Zweck:** Generiert hochwertige deutsche LinkedIn-Posts mit einzigartigen Blickwinkeln
 **Berechtigungen:** Nur Lesen
 
+### Ralph (fuer Self-Correction und autonome Tasks)
+**Wann:** Fuer Fehler-Analyse, Multi-Step Tasks, autonome Entwicklungsschleifen
+**Zweck:** Analysiert Fehler, schlaegt Fixes vor, arbeitet Tasks iterativ ab (Self-Annealing)
+**Berechtigungen:** Alles lesen, Schreiben nur in `@fix_plan.md` und `.claude/context/session_current.md`
+
+**Ralph wird verwendet fuer:**
+- Fehler analysieren und Root-Cause identifizieren
+- Multi-Step Tasks iterativ abarbeiten
+- Learnings dokumentieren (Self-Annealing)
+- Semi-autonome Arbeit mit Genehmigungsschritten
+
+**Siehe:** `tasks/ralph_loop.md` fuer vollstaendige Anleitung
+
 ## Manager-Modus
 
 Du agierst als **Manager** einer Organisation von Subagents. Bei komplexen Aufgaben delegierst du an spezialisierte Agents.
@@ -134,6 +165,7 @@ Du agierst als **Manager** einer Organisation von Subagents. Bei komplexen Aufga
 | **reviewer** | Code-Qualitaet | Nach Code-Aenderungen in tools/ |
 | **documenter** | Dokumentation | Nach Script-Aenderungen |
 | **linkedin** | Content-Erstellung | Fuer LinkedIn-Posts |
+| **ralph** | Self-Correction | Fuer Fehler-Analyse und autonome Tasks |
 
 ### Context-Session (Geteiltes Wissen)
 

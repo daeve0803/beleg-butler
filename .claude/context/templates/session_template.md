@@ -1,41 +1,23 @@
-# Context Session: [TITEL]
+# Session: [Kurztitel]
 
-**Erstellt:** [DATUM]
-**Status:** [In Bearbeitung | Abgeschlossen | Blockiert]
+## Auftrag
+[Was soll erreicht werden?]
 
----
+## Status
+IN_PROGRESS | COMPLETED | BLOCKED
 
-## Ziel
+## Delegierte Tasks
 
-[Was soll in dieser Session erreicht werden?]
-
-## Kontext
-
-[Relevanter Hintergrund fuer Subagents]
-
-## Aktuelle Aufgabe
-
-[Die spezifische Aufgabe, die gerade bearbeitet wird]
-
-## Bisherige Ergebnisse
-
-- [Ergebnis 1]
-- [Ergebnis 2]
+### Task 1: [Name]
+- **Subagent:** reviewer | documenter | linkedin
+- **Status:** PENDING | IN_PROGRESS | DONE | FAILED
+- **Ergebnis:** [Zusammenfassung]
 
 ## Offene Fragen
+- [Was ist noch unklar?]
 
-- [ ] [Frage 1]
-- [ ] [Frage 2]
+## Learnings (Self-Annealing)
+- [Was wurde gelernt?]
 
-## Naechste Schritte
-
-1. [Schritt 1]
-2. [Schritt 2]
-
-## Notizen fuer Subagents
-
-[Spezifische Hinweise, die Subagents wissen muessen]
-
----
-
-*Zuletzt aktualisiert: [DATUM/UHRZEIT]*
+## Finales Ergebnis
+[Output fuer User]
