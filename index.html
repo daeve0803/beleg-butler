@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html lang="de" class="scroll-smooth bg-[#030303]">
+<html lang="de" class="bg-[#030303]">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Beleg.Butler | Deine Eingangsrechnungen auf Autopilot</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<!-- GSAP & ScrollTrigger (Nur für Animationen, nicht fürs Scrollen) -->
+<!-- GSAP & ScrollTrigger -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<!-- Lenis (Smooth Scroll) -->
+<script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -23,36 +25,32 @@ background-color: #030303;
 color: #ffffff;
 overflow-x: hidden;
 margin: 0;
-cursor: default; /* Fallback */
+cursor: none; /* Cursor standardmäßig versteckt für Custom Cursor */
 }
 
-/* Custom Cursor nur auf Geräten mit Maus */
-@media (hover: hover) and (pointer: fine) {
-    body { cursor: none; }
-    #cursor { display: block; }
+/* Fallback für Touch Devices */
+@media (hover: none) {
+    body { cursor: auto; }
+    #cursor { display: none !important; }
 }
 
-/* --- OPTIMIZED CURSOR --- */
+/* --- CUSTOM CURSOR (Wieder mit Lag & Blend Mode) --- */
 #cursor {
 position: fixed;
 top: 0; left: 0;
 width: var(--cursor-size); height: var(--cursor-size);
-border: 1px solid rgba(255, 255, 255, 0.5);
+background-color: white; /* Weiß für Difference Mode */
 border-radius: 50%;
 pointer-events: none;
 z-index: 9999;
 transform: translate(-50%, -50%);
-/* Keine Transition mehr für Position -> Sofortige Reaktion */
-transition: width 0.2s, height 0.2s, background-color 0.2s; 
-mix-blend-mode: difference;
-display: none; 
-will-change: left, top;
+mix-blend-mode: difference; /* Der Kontrast-Effekt */
+transition: width 0.3s ease, height 0.3s ease; /* Nur Größe animieren, Position macht JS */
+will-change: transform;
 }
 
 #cursor.hovered {
 width: 50px; height: 50px;
-background-color: white;
-border-color: transparent;
 mix-blend-mode: exclusion;
 }
 
@@ -60,30 +58,29 @@ mix-blend-mode: exclusion;
 .font-display { font-family: 'Space Grotesk', sans-serif; }
 
 /* --- UTILITIES --- */
-/* Blur reduziert für bessere Performance */
 .glass {
 background: rgba(255, 255, 255, 0.03);
-backdrop-filter: blur(5px); 
--webkit-backdrop-filter: blur(5px);
+backdrop-filter: blur(8px); 
+-webkit-backdrop-filter: blur(8px);
 border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .grayscale-img {
 filter: grayscale(100%);
-transition: filter 0.3s ease, transform 0.3s ease;
+transition: filter 0.5s ease, transform 0.7s ease;
 }
 .group:hover .grayscale-img {
 filter: grayscale(0%);
-transform: scale(1.02);
+transform: scale(1.05);
 }
 
 /* --- 3D ANIMATIONS --- */
 .card-3d-wrap { perspective: 1000px; }
 .card-3d-inner {
 transform-style: preserve-3d;
-transition: transform 0.1s ease-out; /* Schneller */
-will-change: transform;
+transition: transform 0.1s linear; 
+will-change: transform; 
 }
-.card-element { transform: translateZ(30px); }
+.card-element { transform: translateZ(40px); }
 
 /* --- MASK REVEAL --- */
 .mask-text { overflow: hidden; display: block; }
@@ -153,7 +150,6 @@ plugins: []
 <body class="antialiased overflow-x-hidden text-white bg-black relative">
     
     <!-- Unicorn Studio Hintergrund (Die Welle) -->
-    <!-- Performance: will-change entfernt, da static background oft besser ist -->
     <div class="aura-background-component inset-0 pointer-events-none z-0 fixed saturate-200 hue-rotate-180" data-alpha-mask="80" style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent);">
         <div class="aura-background-component top-0 w-full -z-10 absolute h-full">
             <div data-us-project="FixNvEwvWwbu3QX9qC3F" class="absolute w-full h-full left-0 top-0 -z-10"></div>
@@ -163,7 +159,7 @@ plugins: []
         </div>
     </div>
 
-    <!-- CUSTOM CURSOR -->
+    <!-- CUSTOM CURSOR (Initial versteckt, JS macht ihn sichtbar) -->
     <div id="cursor"></div>
 
     <!-- NAVIGATION -->
@@ -237,7 +233,7 @@ plugins: []
             </div>
 
             <!-- NEU: Direkte Anmeldung (Eingabefeld) -->
-            <div class="w-full max-w-md mt-16 animate-fade-up opacity-0" style="animation-delay: 0.6s;">
+            <div class="w-full max-w-md mt-16 animate-fade-up opacity-0 hover-trigger" style="animation-delay: 0.6s;">
                 <form class="relative group" onsubmit="event.preventDefault(); alert('Danke! Du bist auf der Liste.');">
                     <!-- Glow Effect -->
                     <div class="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
@@ -275,7 +271,7 @@ plugins: []
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
     
                 <!-- Card 1: Scanning -->
-                <div class="group relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)] hover:border-yellow-500/50 transition-all duration-500 hover:-translate-y-2">
+                <div class="group hover-trigger relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)] hover:border-yellow-500/50 transition-all duration-500 hover:-translate-y-2">
                     <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center overflow-hidden">
                         <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80')] bg-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700"></div>
                         <div class="w-full h-1 bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,1)] absolute top-0 animate-[scan-line_3s_linear_infinite]"></div>
@@ -301,7 +297,7 @@ plugins: []
                 </div>
 
                 <!-- Card 2: AI Processing -->
-                <div class="group relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:border-blue-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 100ms;">
+                <div class="group hover-trigger relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:border-blue-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 100ms;">
                     <div class="absolute inset-0 w-full h-full bg-gray-900 font-mono text-[10px] text-blue-400 p-4 opacity-60 overflow-hidden">
                         <div class="animate-type whitespace-pre-wrap">
 > Analyzing Invoice #2024-89
@@ -334,8 +330,8 @@ plugins: []
                     </div>
                 </div>
 
-                <!-- Card 3: Export (Animated Checkmark) -->
-                <div class="group relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(168,85,247,0.3)] hover:border-purple-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 200ms;">
+                <!-- Card 3: Export (UPDATED: Green Border & Dot) -->
+                <div class="group hover-trigger relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(34,197,94,0.3)] hover:border-green-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 200ms;">
                     <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center">
                         <!-- Animated Container -->
                         <div class="w-20 h-20 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500 shadow-[0_0_30px_rgba(34,197,94,0.4)] animate-success">
@@ -349,7 +345,8 @@ plugins: []
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 pointer-events-none"></div>
 
                     <div class="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-1.5">
-                        <div class="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></div>
+                        <!-- GREEN DOT -->
+                        <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
                         <span class="text-[10px] font-mono font-medium text-white/90 tracking-wider uppercase">Gespeichert</span>
                     </div>
 
@@ -530,7 +527,7 @@ plugins: []
                     <h4 class="text-xs font-bold uppercase tracking-widest mb-6 text-white">Noch nicht eingetragen?</h4>
                     <form class="relative" onsubmit="event.preventDefault(); alert('Danke! Du stehst auf der Liste.');">
                         <input type="email" placeholder="Deine E-Mail Adresse" required class="focus:outline-none focus:border-yellow-500 transition-colors text-sm text-white bg-white/5 w-full border-white/10 border rounded-lg pt-3 pr-12 pb-3 pl-4">
-                        <button type="submit" class="absolute right-2 top-2 p-1 rounded transition-colors bg-white text-black hover:bg-yellow-400 cursor-pointer">
+                        <button type="submit" class="absolute right-2 top-2 p-1 rounded transition-colors bg-white text-black hover:bg-yellow-400 cursor-pointer hover-trigger">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[16px] h-[16px]"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </button>
                     </form>
@@ -551,20 +548,51 @@ plugins: []
 
     <!-- SCRIPTS -->
     <script>
-        // GSAP ScrollTrigger registration
+        // 1. LIGHTER SMOOTH SCROLL CONFIG
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1, 
+            smoothTouch: false,
+            touchMultiplier: 2,
+        })
+
+        function raf(time) {
+            lenis.raf(time)
+            requestAnimationFrame(raf)
+        }
+        requestAnimationFrame(raf)
+
+        // Connect GSAP to Lenis
         gsap.registerPlugin(ScrollTrigger);
         
-        // 2. Custom Cursor Logic (Only on Desktop)
-        // Vereinfacht für maximale Performance (Keine Berechnungen, direkte Position)
+        // 2. RESTORED CURSOR LOGIC (With Lag Effect)
         if (window.matchMedia("(pointer: fine)").matches) {
             const cursor = document.getElementById('cursor');
             const hoverTriggers = document.querySelectorAll('.hover-trigger');
             
+            // Variabeln für Interpolation
+            let mouseX = 0, mouseY = 0;
+            let cursorX = 0, cursorY = 0;
+            const speed = 0.15; // 0.1 = sehr träge, 1.0 = instant
+
             document.addEventListener('mousemove', (e) => {
-                // Direkte Zuweisung für 0 Latenz
-                cursor.style.left = e.clientX + 'px';
-                cursor.style.top = e.clientY + 'px';
+                mouseX = e.clientX;
+                mouseY = e.clientY;
             });
+
+            function animateCursor() {
+                // Lerp (Linear Interpolation) für den Lag-Effekt
+                cursorX += (mouseX - cursorX) * speed;
+                cursorY += (mouseY - cursorY) * speed;
+                
+                cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+                requestAnimationFrame(animateCursor);
+            }
+            animateCursor();
 
             hoverTriggers.forEach(el => {
                 el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
@@ -586,7 +614,7 @@ plugins: []
         gsap.to(".animate-fade-in", { opacity: 1, duration: 1, delay: 0.5 });
         gsap.to(".animate-fade-up", { opacity: 1, y: 0, duration: 1, delay: 0.8, ease: "power2.out" });
 
-        // 5. 3D Card Tilt (Performance Optimized via RAF)
+        // 5. 3D Card Tilt
         if (window.matchMedia("(hover: hover)").matches) {
             const cards3d = document.querySelectorAll('.card-3d-wrap');
             
