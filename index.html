@@ -17,7 +17,7 @@
 
 <style>
 :root {
---cursor-size: 20px;
+/* Keine Cursor Größe mehr nötig */
 }
 body {
 font-family: 'Manrope', sans-serif;
@@ -25,33 +25,28 @@ background-color: #030303;
 color: #ffffff;
 overflow-x: hidden;
 margin: 0;
-cursor: none; /* Cursor standardmäßig versteckt für Custom Cursor */
+cursor: default; /* Nativer Cursor ist zurück */
 }
 
-/* Fallback für Touch Devices */
-@media (hover: none) {
-    body { cursor: auto; }
-    #cursor { display: none !important; }
-}
-
-/* --- CUSTOM CURSOR (Wieder mit Lag & Blend Mode) --- */
-#cursor {
+/* --- SPOTLIGHT GLOW EFFECT --- */
+#cursor-glow {
 position: fixed;
 top: 0; left: 0;
-width: var(--cursor-size); height: var(--cursor-size);
-background-color: white; /* Weiß für Difference Mode */
-border-radius: 50%;
-pointer-events: none;
-z-index: 9999;
+width: 500px; height: 500px; /* Größe des Lichtkegels */
+/* Goldener Glow, der nach außen transparent wird */
+background: radial-gradient(circle closest-side, rgba(250, 204, 21, 0.12), transparent);
 transform: translate(-50%, -50%);
-mix-blend-mode: difference; /* Der Kontrast-Effekt */
-transition: width 0.3s ease, height 0.3s ease; /* Nur Größe animieren, Position macht JS */
-will-change: transform;
+pointer-events: none; /* Klicks gehen durch */
+z-index: 9999; /* Über allem, aber durchlässig */
+mix-blend-mode: screen; /* Licht-Effekt */
+opacity: 0; /* Erst sichtbar bei Mausbewegung */
+transition: opacity 0.5s ease;
+will-change: left, top;
 }
 
-#cursor.hovered {
-width: 50px; height: 50px;
-mix-blend-mode: exclusion;
+/* Fallback für Touch Devices: Kein Glow */
+@media (hover: none) {
+    #cursor-glow { display: none !important; }
 }
 
 /* --- TYPOGRAPHY --- */
@@ -159,8 +154,8 @@ plugins: []
         </div>
     </div>
 
-    <!-- CUSTOM CURSOR (Initial versteckt, JS macht ihn sichtbar) -->
-    <div id="cursor"></div>
+    <!-- CUSTOM GLOW SPOTLIGHT (Kein Kreis mehr, sondern Licht) -->
+    <div id="cursor-glow"></div>
 
     <!-- NAVIGATION -->
     <nav class="fixed transition-transform duration-300 z-50 pt-4 px-4 md:pt-6 md:px-6 top-0 right-0 left-0" id="navbar">
@@ -330,7 +325,7 @@ plugins: []
                     </div>
                 </div>
 
-                <!-- Card 3: Export (UPDATED: Green Border & Dot) -->
+                <!-- Card 3: Export (UPDATED: ALL GREEN) -->
                 <div class="group hover-trigger relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(34,197,94,0.3)] hover:border-green-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 200ms;">
                     <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center">
                         <!-- Animated Container -->
@@ -527,7 +522,7 @@ plugins: []
                     <h4 class="text-xs font-bold uppercase tracking-widest mb-6 text-white">Noch nicht eingetragen?</h4>
                     <form class="relative" onsubmit="event.preventDefault(); alert('Danke! Du stehst auf der Liste.');">
                         <input type="email" placeholder="Deine E-Mail Adresse" required class="focus:outline-none focus:border-yellow-500 transition-colors text-sm text-white bg-white/5 w-full border-white/10 border rounded-lg pt-3 pr-12 pb-3 pl-4">
-                        <button type="submit" class="absolute right-2 top-2 p-1 rounded transition-colors bg-white text-black hover:bg-yellow-400 cursor-pointer hover-trigger">
+                        <button type="submit" class="absolute right-2 top-2 p-1 rounded transition-colors bg-white text-black hover:bg-yellow-400 cursor-pointer">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[16px] h-[16px]"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </button>
                     </form>
@@ -569,34 +564,22 @@ plugins: []
         // Connect GSAP to Lenis
         gsap.registerPlugin(ScrollTrigger);
         
-        // 2. RESTORED CURSOR LOGIC (With Lag Effect)
+        // 2. SPOTLIGHT GLOW CURSOR LOGIC
         if (window.matchMedia("(pointer: fine)").matches) {
-            const cursor = document.getElementById('cursor');
-            const hoverTriggers = document.querySelectorAll('.hover-trigger');
+            const glow = document.getElementById('cursor-glow');
             
-            // Variabeln für Interpolation
-            let mouseX = 0, mouseY = 0;
-            let cursorX = 0, cursorY = 0;
-            const speed = 0.15; // 0.1 = sehr träge, 1.0 = instant
-
+            // Mouse move handler
             document.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
+                // Glow sichtbar machen und positionieren
+                glow.style.opacity = '1';
+                // WICHTIG: Direkte Positionierung für 0 Latenz
+                glow.style.left = e.clientX + 'px';
+                glow.style.top = e.clientY + 'px';
             });
 
-            function animateCursor() {
-                // Lerp (Linear Interpolation) für den Lag-Effekt
-                cursorX += (mouseX - cursorX) * speed;
-                cursorY += (mouseY - cursorY) * speed;
-                
-                cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
-                requestAnimationFrame(animateCursor);
-            }
-            animateCursor();
-
-            hoverTriggers.forEach(el => {
-                el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
-                el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+            // Optional: Glow ausblenden wenn Maus das Fenster verlässt
+            document.addEventListener('mouseleave', () => {
+                glow.style.opacity = '0';
             });
         }
 
