@@ -52,18 +52,6 @@ background-color: white;
 border-color: transparent;
 mix-blend-mode: exclusion;
 }
-#cursor.view-cursor {
-width: 80px; height: 80px;
-background-color: rgba(255,255,255,0.1);
-backdrop-filter: blur(2px);
-border-color: rgba(255,255,255,0.2);
-display: flex; align-items: center; justify-content: center;
-}
-#cursor.view-cursor::after {
-content: 'VIEW';
-font-size: 10px; font-weight: 700; color: white;
-letter-spacing: 1px;
-}
 /* --- TYPOGRAPHY --- */
 .font-display { font-family: 'Space Grotesk', sans-serif; }
 /* --- UTILITIES --- */
@@ -98,6 +86,21 @@ will-change: transform;
 .bg-noise {
 background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
 }
+/* --- ANIMATIONS FOR CARDS --- */
+@keyframes scan-line {
+0% { top: 0%; opacity: 0; }
+10% { opacity: 1; }
+90% { opacity: 1; }
+100% { top: 100%; opacity: 0; }
+}
+@keyframes code-type {
+0% { width: 0; }
+50% { width: 70%; }
+100% { width: 70%; }
+}
+.animate-type {
+animation: code-type 2s steps(20, end) infinite alternate;
+}
 </style>
 <script>
 tailwind.config = {
@@ -105,7 +108,7 @@ theme: {
 extend: {
     colors: {
         yellow: {
-            400: '#FACC15', // Keeping the Gold/Yellow accent from design
+            400: '#FACC15', 
             500: '#EAB308',
         }
     }
@@ -117,9 +120,18 @@ plugins: []
 </head>
 <body class="antialiased overflow-x-hidden text-white bg-black relative">
     
-    <!-- Background Video (Abstract / Flow) -->
-    <div class="video-background-container fixed top-0 w-full h-full -z-10" data-alpha-mask="80" style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent)">
-        <video src="https://cdn.coverr.co/videos/coverr-abstract-digital-tunnel-4424/1080p.mp4" autoplay="" loop="" muted="" playsinline="" class="w-full h-full object-cover opacity-40"></video>
+    <!-- 
+      KORREKTUR: Unicorn Studio Hintergrund (Die Welle) 
+      Original Video und Canvas entfernt. 
+      hue-rotate-180 sorgt für den orangenen/goldenen Look der Welle.
+    -->
+    <div class="aura-background-component inset-0 pointer-events-none z-0 fixed saturate-200 hue-rotate-180" data-alpha-mask="80" style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent);">
+        <div class="aura-background-component top-0 w-full -z-10 absolute h-full">
+            <div data-us-project="FixNvEwvWwbu3QX9qC3F" class="absolute w-full h-full left-0 top-0 -z-10"></div>
+            <script type="text/javascript">
+                !function(){if(!window.UnicornStudio){window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js",i.onload=function(){window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)},(document.head || document.body).appendChild(i)}}();
+            </script>
+        </div>
     </div>
 
     <!-- CUSTOM CURSOR -->
@@ -163,8 +175,7 @@ plugins: []
 
     <!-- SECTION 1: HERO -->
     <section class="min-h-[100dvh] flex flex-col overflow-hidden z-10 md:px-6 pr-4 pl-4 relative items-center justify-center">
-        <!-- Creative Canvas Background -->
-        <canvas class="pointer-events-none z-0 opacity-40 w-full h-full absolute top-0 right-0 bottom-0 left-0" width="1030" height="794" id="hero-canvas"></canvas>
+        <!-- Canvas entfernt, da durch Unicorn Studio ersetzt -->
         <div class="z-0 pointer-events-none bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 absolute top-0 right-0 bottom-0 left-0"></div>
 
         <div class="z-10 text-center max-w-[1400px] mr-auto ml-auto relative gap-x-12 gap-y-16">
@@ -200,7 +211,6 @@ plugins: []
     <!-- SECTION 2: LIVE DASHBOARD / FEED -->
     <section class="md:py-32 md:px-6 bg-[#030303] border-white/5 border-t pt-20 pr-4 pb-20 pl-4 relative" id="how-it-works">
         <div class="z-10 max-w-[1400px] mr-auto ml-auto relative">
-            <!-- Section Header -->
             <div class="flex flex-col md:flex-row md:items-end md:mb-16 gap-6 md:gap-8 mb-16 items-start justify-between">
                 <div class="gap-x-4 gap-y-4">
                     <h2 class="text-3xl md:text-4xl lg:text-6xl font-display font-medium mb-4 md:mb-6 text-white">Live Verarbeitung</h2>
@@ -214,12 +224,10 @@ plugins: []
                 </div>
             </div>
 
-            <!-- Dashboard/Video Grid -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
     
-                <!-- Card 1: Scanning (Yellow Theme) -->
+                <!-- Card 1: Scanning -->
                 <div class="group relative aspect-[4/5] md:aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)] hover:border-yellow-500/50 transition-all duration-500 hover:-translate-y-2">
-                    <!-- Placeholder for Scanning Animation -->
                     <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center overflow-hidden">
                         <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80')] bg-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700"></div>
                         <div class="w-full h-1 bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,1)] absolute top-0 animate-[scan-line_3s_linear_infinite]"></div>
@@ -227,13 +235,11 @@ plugins: []
                     
                     <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 pointer-events-none"></div>
 
-                    <!-- Status Badge -->
                     <div class="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-1.5">
                         <div class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></div>
                         <span class="text-[10px] font-mono font-medium text-white/90 tracking-wider uppercase">Scannt...</span>
                     </div>
 
-                    <!-- Content -->
                     <div class="absolute bottom-0 left-0 w-full p-6 z-20">
                         <div class="flex flex-col gap-2">
                             <h3 class="font-display text-lg">Posteingang</h3>
@@ -246,7 +252,7 @@ plugins: []
                     </div>
                 </div>
 
-                <!-- Card 2: AI Processing (Blue Theme) -->
+                <!-- Card 2: AI Processing -->
                 <div class="group relative aspect-[4/5] md:aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:border-blue-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 100ms;">
                     <div class="absolute inset-0 w-full h-full bg-gray-900 font-mono text-[10px] text-blue-400 p-4 opacity-60 overflow-hidden">
                         <div class="animate-type whitespace-pre-wrap">
@@ -280,7 +286,7 @@ plugins: []
                     </div>
                 </div>
 
-                <!-- Card 3: Export (Purple Theme) -->
+                <!-- Card 3: Export -->
                 <div class="group relative aspect-[4/5] md:aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(168,85,247,0.3)] hover:border-purple-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 200ms;">
                     <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center">
                         <div class="w-16 h-16 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500 shadow-[0_0_30px_rgba(34,197,94,0.4)]">
@@ -594,70 +600,8 @@ plugins: []
             });
         }
 
-        // 3. CANVAS ANIMATION
-        const canvas = document.getElementById('hero-canvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-        let streams = [];
-        const gap = 40; 
-
-        class Stream {
-            constructor(x) {
-                this.x = x;
-                this.y = Math.random() * height;
-                this.speed = Math.random() * 2 + 0.5;
-                this.length = Math.random() * 100 + 50;
-                this.opacity = Math.random() * 0.3 + 0.05;
-            }
-            update() {
-                this.y -= this.speed;
-                if (this.y + this.length < 0) {
-                    this.y = height + Math.random() * 100;
-                    this.speed = Math.random() * 2 + 0.5;
-                }
-            }
-            draw(ctx) {
-                ctx.strokeStyle = `rgba(255, 255, 255, 0.03)`;
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(this.x, 0);
-                ctx.lineTo(this.x, height);
-                ctx.stroke();
-
-                const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.length);
-                gradient.addColorStop(0, `rgba(255, 255, 255, 0)`);
-                gradient.addColorStop(0.5, `rgba(255, 255, 255, ${this.opacity})`);
-                gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
-
-                ctx.fillStyle = gradient;
-                ctx.fillRect(this.x - 1, this.y, 3, this.length);
-            }
-        }
-
-        function initCanvas() {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            canvas.width = width;
-            canvas.height = height;
-            streams = [];
-            for (let x = gap / 2; x < width; x += gap) {
-                streams.push(new Stream(x));
-            }
-        }
-
-        function animateCanvas() {
-            ctx.clearRect(0, 0, width, height);
-            streams.forEach(s => {
-                s.update();
-                s.draw(ctx);
-            });
-            requestAnimationFrame(animateCanvas);
-        }
-
-        window.addEventListener('resize', initCanvas);
-        initCanvas();
-        animateCanvas();
-
+        // 3. CANVAS (Entfernt da Unicorn Studio Welle genutzt wird)
+        
         // 4. Hero Text Mask Animation
         const headings = document.querySelectorAll('.mask-text span');
         headings.forEach((h, i) => {
