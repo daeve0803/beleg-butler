@@ -1,318 +1,708 @@
 <!DOCTYPE html>
-<html lang="de" class="scroll-smooth">
+<html lang="de" class="bg-[#030303]">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaxFlow - Steuererklärung auf Autopilot</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TaxFlow | Automatisierte Steuer-Vorbereitung</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      fontFamily: {
-        sans: ['Geist', 'sans-serif'],
-      },
-      colors: {
-        neutral: {
-          50: '#fafafa',
-          100: '#f5f5f5',
-          200: '#e5e5e5',
-          300: '#d4d4d4',
-          400: '#a3a3a3',
-          500: '#737373',
-          600: '#525252',
-          700: '#404040',
-          800: '#262626',
-          900: '#171717',
-        }
-      },
-      animation: {
-        'clip-in': 'clipIn 1.2s cubic-bezier(0.25, 1, 0.5, 1) both',
-        'fade-up': 'fadeUp 0.8s ease-out forwards',
-      },
-      keyframes: {
-        clipIn: {
-          '0%': { opacity: '0', clipPath: 'inset(0 0 100% 0)' },
-          '100%': { opacity: '1', clipPath: 'inset(0 0 0 0)' },
-        },
-        fadeUp: {
-          '0%': { opacity: '0', transform: 'translateY(20px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        }
-      }
-    }
-  }
-}
-</script>
+<!-- GSAP & ScrollTrigger -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<!-- Lenis (Smooth Scroll) -->
+<script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-/* Custom Utilities */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+:root {
+--cursor-size: 20px;
 }
-/* Vertical Lines Background */
-.grid-lines {
-  background-size: 20% 100%;
-  background-image: linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px);
+body {
+font-family: 'Manrope', sans-serif;
+background-color: #030303;
+color: #ffffff;
+overflow-x: hidden;
+margin: 0;
 }
-/* Button Shine Effect */
-.glass-button {
-  background: linear-gradient(-75deg, rgba(23, 23, 23, 1), rgba(40, 40, 40, 1));
-  color: white;
-  transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1);
+@media (hover: hover) and (pointer: fine) {
+body { cursor: none; }
 }
-.glass-button:hover {
-  transform: scale(0.98);
-  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+/* --- CUSTOM CURSOR --- */
+#cursor {
+position: fixed;
+top: 0; left: 0;
+width: var(--cursor-size); height: var(--cursor-size);
+border: 1px solid rgba(255, 255, 255, 0.5);
+border-radius: 50%;
+pointer-events: none;
+z-index: 9999;
+transform: translate(-50%, -50%);
+transition: width 0.3s, height 0.3s, background-color 0.3s;
+mix-blend-mode: difference;
+display: none; 
+}
+@media (hover: hover) and (pointer: fine) {
+#cursor { display: block; }
+}
+#cursor.hovered {
+width: 50px; height: 50px;
+background-color: white;
+border-color: transparent;
+mix-blend-mode: exclusion;
+}
+#cursor.view-cursor {
+width: 80px; height: 80px;
+background-color: rgba(255,255,255,0.1);
+backdrop-filter: blur(2px);
+border-color: rgba(255,255,255,0.2);
+display: flex; align-items: center; justify-content: center;
+}
+#cursor.view-cursor::after {
+content: 'VIEW';
+font-size: 10px; font-weight: 700; color: white;
+letter-spacing: 1px;
+}
+/* --- TYPOGRAPHY --- */
+.font-display { font-family: 'Space Grotesk', sans-serif; }
+/* --- UTILITIES --- */
+.glass {
+background: rgba(255, 255, 255, 0.03);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.grayscale-img {
+filter: grayscale(100%);
+transition: filter 0.5s ease, transform 0.7s ease;
+}
+.group:hover .grayscale-img {
+filter: grayscale(0%);
+transform: scale(1.05);
+}
+/* --- 3D ANIMATIONS --- */
+.card-3d-wrap { perspective: 1000px; }
+.card-3d-inner {
+transform-style: preserve-3d;
+transition: transform 0.5s;
+}
+.card-element { transform: translateZ(40px); }
+/* --- MASK REVEAL --- */
+.mask-text { overflow: hidden; display: block; }
+.mask-text span {
+display: block;
+transform: translateY(110%);
+will-change: transform;
+}
+/* --- NOISE TEXTURE --- */
+.bg-noise {
+background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
 }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>.font-geist { font-family: 'Geist', sans-serif !important; }</style>
+<script>
+tailwind.config = {
+theme: {
+extend: {
+    colors: {
+        yellow: {
+            400: '#FACC15', // Keeping the Gold/Yellow accent from design
+            500: '#EAB308',
+        }
+    }
+}
+},
+plugins: []
+};
+</script>
 </head>
-<body class="min-h-screen overflow-x-hidden selection:bg-neutral-300 selection:text-neutral-900 text-neutral-900 bg-neutral-100 relative font-geist">
-
-    <!-- Background Grid Lines -->
-    <div class="fixed grid-lines w-full h-full top-0 right-0 bottom-0 left-0 pointer-events-none"></div>
-
-    <div class="relative z-10 flex flex-col lg:flex-row min-h-screen max-w-[1600px] mx-auto">
-        
-        <!-- Sidebar / Navigation (Simplified for One-Page) -->
-        <aside class="lg:w-64 lg:fixed lg:h-screen flex flex-col z-50 glass-panel lg:bg-transparent lg:backdrop-blur-none lg:border-none lg:border-r w-full border-neutral-200/50 border-b pt-8 pr-8 pb-8 pl-8 justify-between">
-            <div>
-                <div class="mb-12 animate-clip-in" style="animation-delay: 0.1s;">
-                    <a href="#" class="block text-2xl tracking-tighter font-semibold group">
-                        Tax<span class="text-neutral-400 group-hover:text-neutral-900 transition-colors">Flow</span>
-                    </a>
-                </div>
-
-                <nav class="space-y-4 animate-clip-in" style="animation-delay: 0.2s;">
-                    <a href="#hero" class="block text-lg text-neutral-900 font-medium hover:translate-x-1 transition-transform cursor-pointer">Start</a>
-                    <a href="#problem" class="block text-lg text-neutral-500 hover:text-neutral-900 hover:translate-x-1 transition-all cursor-pointer">Das Problem</a>
-                    <a href="#features" class="block text-lg text-neutral-500 hover:text-neutral-900 hover:translate-x-1 transition-all cursor-pointer">Funktionen</a>
-                    <a href="#how-it-works" class="block text-lg text-neutral-500 hover:text-neutral-900 hover:translate-x-1 transition-all cursor-pointer">So geht's</a>
-                </nav>
-            </div>
-
-            <div class="hidden lg:block space-y-2 animate-clip-in" style="animation-delay: 0.3s;">
-                <div class="text-sm leading-tight text-neutral-400">
-                    <p>Early Access</p>
-                    <p>2025 Edition</p>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="flex-1 lg:ml-64 lg:p-16 flex flex-col gap-24 overflow-hidden pt-6 pr-6 pb-6 pl-6">
-
-            <!-- Hero Section -->
-            <section id="hero" class="grid grid-cols-1 lg:grid-cols-12 gap-12 pt-10 min-h-[80vh] items-center">
-                <div class="animate-clip-in lg:col-span-8 pb-4 space-y-8" style="animation-delay: 0.4s">
-                    <div class="inline-block px-3 py-1 rounded-full border border-neutral-300 bg-white text-xs font-medium text-neutral-600 mb-2">
-                        Warteliste jetzt geöffnet
-                    </div>
-                    <h1 class="leading-[0.95] lg:text-7xl xl:text-7xl text-5xl font-medium text-neutral-900 tracking-tight">
-                        Nie wieder Stress mit der jährlichen Steuererklärung.
-                    </h1>
-                    <p class="leading-snug lg:text-xl text-lg font-normal text-neutral-500 max-w-2xl">
-                        Schluss mit Schuhkartons voller Belege. TaxFlow kategorisiert deine Rechnungen vollautomatisch und bereitet alles perfekt für deinen Steuerberater vor. Speziell für Kleinunternehmer.
-                    </p>
-                    
-                    <!-- Waitlist Form -->
-                    <div class="max-w-md mt-8">
-                        <form class="flex flex-col sm:flex-row gap-3">
-                            <input type="email" placeholder="deine@email.de" required class="flex-1 px-4 py-3.5 rounded-xl border border-neutral-300 bg-white/50 backdrop-blur focus:outline-none focus:ring-2 focus:ring-neutral-900 transition-all placeholder:text-neutral-400">
-                            <button type="submit" class="glass-button cursor-pointer outline-none focus:outline-none z-30 pointer-events-auto text-base rounded-xl relative px-6 py-3.5 font-medium tracking-tight">
-                                Auf die Liste
-                            </button>
-                        </form>
-                        <p class="text-xs text-neutral-400 mt-3">Beitritt völlig unverbindlich. Wir spammen nicht.</p>
-                    </div>
-                </div>
-
-                <!-- Abstract Visual -->
-                <div class="hidden lg:flex lg:col-span-4 animate-clip-in justify-center items-center" style="animation-delay: 0.5s">
-                   <div class="relative w-full aspect-square bg-gradient-to-tr from-neutral-200 to-neutral-100 rounded-full blur-3xl opacity-60"></div>
-                   <div class="absolute glass-panel p-6 rounded-2xl shadow-xl max-w-xs rotate-3 animate-fade-up" style="animation-delay: 0.8s">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            </div>
-                            <span class="text-xs text-neutral-400">Gerade eben</span>
-                        </div>
-                        <p class="text-sm font-medium text-neutral-900">Rechnung #4029 automatisch kategorisiert</p>
-                        <p class="text-xs text-neutral-500 mt-1">Kategorie: Bürobedarf • GoBD konform archiviert</p>
-                   </div>
-                </div>
-            </section>
-
-            <!-- Problem / Stats Section -->
-            <section id="problem" class="animate-fade-up w-full" style="animation-delay: 0.6s">
-                <div class="grid grid-cols-1 md:grid-cols-3 bg-white border border-neutral-200 rounded-3xl p-2 gap-2">
-                    <div class="bg-neutral-50 p-8 rounded-2xl border border-neutral-100">
-                        <h3 class="text-3xl font-medium text-neutral-900 mb-2">40 Std.</h3>
-                        <p class="text-[15px] leading-relaxed text-neutral-500">Verbringen Selbstständige durchschnittlich pro Jahr nur mit dem Sortieren von Belegen.</p>
-                    </div>
-                    <div class="bg-neutral-50 p-8 rounded-2xl border border-neutral-100">
-                        <h3 class="text-3xl font-medium text-neutral-900 mb-2">Chaos</h3>
-                        <p class="text-[15px] leading-relaxed text-neutral-500">E-Mail Anhänge, Downloads, Briefpost. Belege sind überall verstreut.</p>
-                    </div>
-                    <div class="bg-neutral-50 p-8 rounded-2xl border border-neutral-100">
-                        <h3 class="text-3xl font-medium text-neutral-900 mb-2">Teuer</h3>
-                        <p class="text-[15px] leading-relaxed text-neutral-500">Der Steuerberater berechnet jede Minute, die er mit unsortierten Unterlagen verbringt.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Features Grid -->
-            <section id="features" class="animate-fade-up w-full" style="animation-delay: 0.3s">
-                <div class="grid lg:grid-cols-12 lg:gap-12 gap-8">
-                    <!-- Text Column -->
-                    <div class="lg:col-span-4 space-y-6">
-                        <h2 class="lg:text-4xl text-3xl font-medium text-neutral-900 tracking-tight">Deine Buchhaltung. <br>Einfach erledigt.</h2>
-                        <p class="text-[17px] leading-relaxed font-normal text-neutral-500">
-                            Wir reduzieren die Komplexität auf das Nötigste. Keine komplizierten Dashboards, sondern ein intelligenter Assistent, der dir den Rücken freihält.
-                        </p>
-                    </div>
-
-                    <!-- Cards Column -->
-                    <div class="lg:col-span-8">
-                        <div class="grid sm:grid-cols-2 gap-4">
-                            <!-- Card 1 -->
-                            <div class="bg-white p-8 rounded-2xl border border-neutral-200/60 flex flex-col gap-5 hover:border-neutral-300 transition-colors shadow-sm">
-                                <div class="w-12 h-12 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-900">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-medium text-neutral-900 mb-2">Zentraler Posteingang</h3>
-                                    <p class="text-[15px] leading-relaxed text-neutral-500">
-                                        Leite Rechnungen einfach per E-Mail weiter oder lade Fotos hoch. Alles landet an einem sicheren Ort.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <!-- Card 2 -->
-                            <div class="bg-white p-8 rounded-2xl border border-neutral-200/60 flex flex-col gap-5 hover:border-neutral-300 transition-colors shadow-sm">
-                                <div class="w-12 h-12 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-900">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 16v.01"/><path d="M12 12v.01"/></svg>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-medium text-neutral-900 mb-2">KI-Kategorisierung</h3>
-                                    <p class="text-[15px] leading-relaxed text-neutral-500">
-                                        Unsere KI erkennt Lieferant, Datum und Betrag und ordnet die Ausgabe automatisch der richtigen Steuer-Kategorie zu.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <!-- Card 3 -->
-                            <div class="bg-white p-8 rounded-2xl border border-neutral-200/60 flex flex-col gap-5 hover:border-neutral-300 transition-colors shadow-sm">
-                                <div class="w-12 h-12 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-900">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-medium text-neutral-900 mb-2">GoBD Konform</h3>
-                                    <p class="text-[15px] leading-relaxed text-neutral-500">
-                                        Alle Belege werden revisionssicher archiviert. Damit bist du für jede Betriebsprüfung gewappnet.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <!-- Card 4 -->
-                            <div class="bg-white p-8 rounded-2xl border border-neutral-200/60 flex flex-col gap-5 hover:border-neutral-300 transition-colors shadow-sm">
-                                <div class="w-12 h-12 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-900">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-medium text-neutral-900 mb-2">Steuerberater Export</h3>
-                                    <p class="text-[15px] leading-relaxed text-neutral-500">
-                                        Am Jahresende (oder monatlich) exportierst du alles fix und fertig für DATEV oder deinen Steuerberater.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- How It Works (Vertical Steps) -->
-            <section id="how-it-works" class="animate-scaleIn bg-white w-full z-10 border border-neutral-200 rounded-3xl p-6 relative shadow-lg">
-                <div class="flex flex-col gap-4 items-start pt-6 px-6 mb-8">
-                    <h2 class="text-4xl lg:text-5xl text-neutral-900 tracking-tighter">In 3 Schritten fertig.</h2>
-                    <p class="text-neutral-500 tracking-tight">So einfach kann Buchhaltung sein.</p>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Step 1 -->
-                    <div class="p-6 flex flex-col bg-neutral-50 border border-neutral-100 rounded-2xl relative">
-                        <span class="inline-flex w-fit items-center px-3 py-1 rounded-full border border-neutral-200 bg-white text-xs font-bold text-neutral-800 mb-4">SCHRITT 1</span>
-                        <div class="h-32 rounded-xl bg-white border border-neutral-200 flex items-center justify-center mb-6">
-                            <iconify-icon icon="solar:camera-minimalistic-bold-duotone" width="48" class="text-neutral-300"></iconify-icon>
-                        </div>
-                        <h3 class="text-2xl text-neutral-900 tracking-tighter mb-2">Beleg erfassen</h3>
-                        <p class="text-sm text-neutral-500 leading-relaxed">Mach ein Foto mit dem Handy, lade das PDF hoch oder leite die Rechnungs-E-Mail direkt an uns weiter.</p>
-                    </div>
-
-                    <!-- Step 2 -->
-                    <div class="p-6 flex flex-col bg-neutral-50 border border-neutral-100 rounded-2xl relative">
-                        <span class="inline-flex w-fit items-center px-3 py-1 rounded-full border border-neutral-200 bg-white text-xs font-bold text-neutral-800 mb-4">SCHRITT 2</span>
-                        <div class="h-32 rounded-xl bg-white border border-neutral-200 flex items-center justify-center mb-6">
-                            <iconify-icon icon="solar:magic-stick-3-bold-duotone" width="48" class="text-neutral-300"></iconify-icon>
-                        </div>
-                        <h3 class="text-2xl text-neutral-900 tracking-tighter mb-2">Automatische Sortierung</h3>
-                        <p class="text-sm text-neutral-500 leading-relaxed">Unsere KI liest die Daten aus, erkennt die Art der Ausgabe und legt sie im richtigen Ordner ab.</p>
-                    </div>
-
-                    <!-- Step 3 -->
-                    <div class="p-6 flex flex-col bg-neutral-50 border border-neutral-100 rounded-2xl relative">
-                        <span class="inline-flex w-fit items-center px-3 py-1 rounded-full border border-neutral-200 bg-white text-xs font-bold text-neutral-800 mb-4">SCHRITT 3</span>
-                        <div class="h-32 rounded-xl bg-white border border-neutral-200 flex items-center justify-center mb-6">
-                            <iconify-icon icon="solar:file-check-bold-duotone" width="48" class="text-neutral-300"></iconify-icon>
-                        </div>
-                        <h3 class="text-2xl text-neutral-900 tracking-tighter mb-2">Entspannter Abschluss</h3>
-                        <p class="text-sm text-neutral-500 leading-relaxed">Ein Klick generiert den ZIP-Export mit Excel-Tabelle für deinen Steuerberater. Fertig.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Waitlist CTA Final -->
-            <section id="waitlist" class="animate-fade-up w-full my-12">
-                <div class="bg-neutral-900 rounded-[2rem] p-12 text-center relative overflow-hidden">
-                    <!-- Abstract bg decoration -->
-                    <div class="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none" style="background: radial-gradient(circle at top right, #555, transparent 50%);"></div>
-                    
-                    <div class="relative z-10 max-w-2xl mx-auto space-y-8">
-                        <h2 class="text-4xl md:text-5xl font-medium text-white tracking-tight">Bereit für stressfreie Steuern?</h2>
-                        <p class="text-neutral-400 text-lg">Sichere dir einen Platz auf der Warteliste und erhalte als Beta-Nutzer lebenslang 20% Rabatt.</p>
-                        
-                        <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                            <input type="email" placeholder="E-Mail Adresse" required class="flex-1 px-4 py-3 rounded-xl border border-neutral-700 bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-white transition-all">
-                            <button type="submit" class="bg-white text-neutral-900 hover:bg-neutral-200 px-6 py-3 rounded-xl font-medium transition-colors">
-                                Kostenlos vormerken
-                            </button>
-                        </form>
-                        <p class="text-xs text-neutral-600">Startet Q3 2025. Nur für Gewerbetreibende & Freelancer.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Footer -->
-            <footer class="pb-10 pt-10 border-t border-neutral-200">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div class="text-neutral-900 font-semibold text-lg">TaxFlow</div>
-                    <div class="text-sm text-neutral-500">
-                        &copy; 2025 TaxFlow SaaS. Made in Germany.
-                    </div>
-                    <div class="flex gap-6 text-sm text-neutral-500">
-                        <a href="#" class="hover:text-neutral-900">Impressum</a>
-                        <a href="#" class="hover:text-neutral-900">Datenschutz</a>
-                    </div>
-                </div>
-            </footer>
-
-        </main>
+<body class="antialiased overflow-x-hidden text-white bg-black relative">
+    
+    <!-- Background Video (Abstract / Flow) -->
+    <div class="video-background-container fixed top-0 w-full h-full -z-10" data-alpha-mask="80" style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent)">
+        <video src="https://cdn.coverr.co/videos/coverr-abstract-digital-tunnel-4424/1080p.mp4" autoplay="" loop="" muted="" playsinline="" class="w-full h-full object-cover opacity-40"></video>
     </div>
+
+    <!-- CUSTOM CURSOR -->
+    <div id="cursor"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed transition-transform duration-300 z-50 pt-4 px-4 md:pt-6 md:px-6 top-0 right-0 left-0" id="navbar">
+        <div class="flex flex-col glass max-w-[1600px] rounded-[24px] md:rounded-full mr-auto ml-auto px-4 py-3 md:px-8 items-center justify-between transition-all duration-300">
+            <div class="flex w-full items-center justify-between">
+                <a href="#" class="flex items-center gap-3 group hover-trigger">
+                    <div class="flex overflow-hidden bg-center text-black bg-white w-7 h-7 md:w-8 md:h-8 items-center justify-center rounded-sm font-bold font-display">
+                        T
+                    </div>
+                    <span class="text-base md:text-lg font-semibold text-white tracking-tight font-display text-left">TAX<span class="font-light text-yellow-500">FLOW</span></span>
+                </a>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center gap-12">
+                    <a href="#how-it-works" class="text-xs font-medium uppercase tracking-widest transition-colors hover-trigger hover:text-white text-yellow-400">So geht's</a>
+                    <a href="#features" class="uppercase transition-colors hover-trigger hover:text-white text-xs font-medium text-yellow-400 tracking-widest">Features</a>
+                    <a href="#testimonials" class="uppercase transition-colors hover-trigger hover:text-white text-xs font-medium text-yellow-400 tracking-widest">Stories</a>
+                </div>
+
+                <!-- Right Actions -->
+                <div class="flex items-center gap-4">
+                    <a href="#waitlist" class="uppercase transition-colors hover-trigger hover:bg-yellow-200 cursor-pointer text-xs font-semibold text-black tracking-wider bg-amber-400 rounded-full px-6 py-2">WARTELISTE</a>
+                </div>
+            </div>
+
+            <!-- Mobile Menu Dropdown -->
+            <div class="mobile-menu hidden w-full flex-col gap-6 pt-6 pb-4 border-t border-white/10 mt-4 md:hidden animate-fade-in bg-black/50 rounded-b-xl backdrop-blur-xl">
+                <div class="flex flex-col gap-4 items-center">
+                    <a href="#how-it-works" class="text-sm font-medium uppercase tracking-widest text-yellow-400 hover:text-white w-full text-center py-3 border-b border-white/5" onclick="toggleMobileMenu()">So geht's</a>
+                    <a href="#features" class="text-sm font-medium uppercase tracking-widest text-yellow-400 hover:text-white w-full text-center py-3 border-b border-white/5" onclick="toggleMobileMenu()">Features</a>
+                    <a href="#testimonials" class="text-sm font-medium uppercase tracking-widest text-yellow-400 hover:text-white w-full text-center py-3" onclick="toggleMobileMenu()">Stories</a>
+                </div>
+                <button class="w-full uppercase transition-colors hover:bg-yellow-200 cursor-pointer text-xs font-semibold text-black tracking-wider bg-amber-400 rounded-full py-4 mt-2" onclick="window.location.href='#waitlist'">ZUR WARTELISTE</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SECTION 1: HERO -->
+    <section class="min-h-[100dvh] flex flex-col overflow-hidden z-10 md:px-6 pr-4 pl-4 relative items-center justify-center">
+        <!-- Creative Canvas Background -->
+        <canvas class="pointer-events-none z-0 opacity-40 w-full h-full absolute top-0 right-0 bottom-0 left-0" width="1030" height="794" id="hero-canvas"></canvas>
+        <div class="z-0 pointer-events-none bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 absolute top-0 right-0 bottom-0 left-0"></div>
+
+        <div class="z-10 text-center max-w-[1400px] mr-auto ml-auto relative gap-x-12 gap-y-16">
+            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full border backdrop-blur-md mb-8 md:mb-12 hover-trigger opacity-0 animate-fade-in border-white/10 bg-white/5" style="opacity: 1;">
+                <span class="w-1.5 h-1.5 rounded-full animate-pulse bg-white"></span>
+                <span class="text-[10px] uppercase font-medium tracking-[0.2em] text-yellow-300">Warteliste geöffnet</span>
+            </div>
+
+            <h1 class="font-display text-5xl sm:text-6xl md:text-8xl lg:text-[7rem] font-medium tracking-tighter leading-[0.95] mb-8 md:mb-12 mix-blend-difference text-white">
+                <span class="mask-text"><span>STEUER</span></span>
+                <span class="mask-text"><span class="text-yellow-500">DOKUMENTE</span></span>
+                <span class="mask-text"><span>AUTOMATISIERT</span></span>
+            </h1>
+
+            <div class="flex flex-col md:flex-row items-center justify-between w-full max-w-4xl mx-auto mt-8 md:mt-12 border-t pt-8 opacity-0 animate-fade-up border-white/10">
+                <p class="text-sm text-yellow-400 text-center md:text-left max-w-xs mb-8 md:mb-0">
+                    Verbinde einmal dein E-Mail-Konto. Wir erkennen Rechnungen, kategorisieren sie und bereiten alles für den Steuerberater vor.
+                </p>
+                <div class="flex gap-12">
+                    <div class="text-center md:text-left">
+                        <div class="text-2xl font-bold font-display">0 Min</div>
+                        <div class="text-[10px] uppercase tracking-widest text-yellow-500">Manueller Aufwand</div>
+                    </div>
+                    <div class="text-center md:text-left">
+                        <div class="text-2xl font-bold font-display">100%</div>
+                        <div class="text-[10px] uppercase tracking-widest text-yellow-500">Automatisierung</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: LIVE DASHBOARD / FEED -->
+    <section class="md:py-32 md:px-6 bg-[#030303] border-white/5 border-t pt-20 pr-4 pb-20 pl-4 relative" id="how-it-works">
+        <div class="z-10 max-w-[1400px] mr-auto ml-auto relative">
+            <!-- Section Header -->
+            <div class="flex flex-col md:flex-row md:items-end md:mb-16 gap-6 md:gap-8 mb-16 items-start justify-between">
+                <div class="gap-x-4 gap-y-4">
+                    <h2 class="text-3xl md:text-4xl lg:text-6xl font-display font-medium mb-4 md:mb-6 text-white">Live Verarbeitung</h2>
+                    <p class="text-base md:text-lg text-yellow-400 max-w-lg">
+                        Dein persönlicher Buchhaltungs-Assistent, der niemals schläft. Eingehende Rechnungen werden sofort erkannt und verarbeitet.
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 text-xs font-mono text-white/40 uppercase tracking-widest">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    System Online
+                </div>
+            </div>
+
+            <!-- Dashboard/Video Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+    
+                <!-- Card 1: Scanning (Yellow Theme) -->
+                <div class="group relative aspect-[4/5] md:aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)] hover:border-yellow-500/50 transition-all duration-500 hover:-translate-y-2">
+                    <!-- Placeholder for Scanning Animation -->
+                    <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80')] bg-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700"></div>
+                        <div class="w-full h-1 bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,1)] absolute top-0 animate-[scan-line_3s_linear_infinite]"></div>
+                    </div>
+                    
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 pointer-events-none"></div>
+
+                    <!-- Status Badge -->
+                    <div class="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-1.5">
+                        <div class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></div>
+                        <span class="text-[10px] font-mono font-medium text-white/90 tracking-wider uppercase">Scannt...</span>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="absolute bottom-0 left-0 w-full p-6 z-20">
+                        <div class="flex flex-col gap-2">
+                            <h3 class="font-display text-lg">Posteingang</h3>
+                            <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-white/20 to-transparent mt-2 mb-2"></div>
+                            <div class="flex justify-between items-center text-[11px] text-white/50 font-mono">
+                                <span class="flex items-center gap-1.5">Gmail & Outlook</span>
+                                <span class="flex items-center gap-1.5">2 Neue E-Mails</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: AI Processing (Blue Theme) -->
+                <div class="group relative aspect-[4/5] md:aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:border-blue-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 100ms;">
+                    <div class="absolute inset-0 w-full h-full bg-gray-900 font-mono text-[10px] text-blue-400 p-4 opacity-60 overflow-hidden">
+                        <div class="animate-type whitespace-pre-wrap">
+> Analyzing Invoice #2024-89
+> Detected: Adobe Systems
+> Amount: € 59,99
+> Date: 12.01.2025
+> Category: Software/Lizenzen
+> Tax: 19%
+> Confidence: 99.8%
+> Status: Matched
+                        </div>
+                    </div>
+                    
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 pointer-events-none"></div>
+
+                    <div class="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-1.5">
+                        <div class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
+                        <span class="text-[10px] font-mono font-medium text-white/90 tracking-wider uppercase">KI-Analyse</span>
+                    </div>
+
+                    <div class="absolute bottom-0 left-0 w-full p-6 z-20">
+                        <div class="flex flex-col gap-2">
+                            <h3 class="font-display text-lg">Kategorisierung</h3>
+                            <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-white/20 to-transparent mt-2 mb-2"></div>
+                            <div class="flex justify-between items-center text-[11px] text-white/50 font-mono">
+                                <span class="flex items-center gap-1.5">Auto-Match</span>
+                                <span class="flex items-center gap-1.5">99.9% Genauigkeit</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Export (Purple Theme) -->
+                <div class="group relative aspect-[4/5] md:aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(168,85,247,0.3)] hover:border-purple-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 200ms;">
+                    <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center">
+                        <div class="w-16 h-16 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500 shadow-[0_0_30px_rgba(34,197,94,0.4)]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                    </div>
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 pointer-events-none"></div>
+
+                    <div class="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-1.5">
+                        <div class="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></div>
+                        <span class="text-[10px] font-mono font-medium text-white/90 tracking-wider uppercase">Exportbereit</span>
+                    </div>
+
+                    <div class="absolute bottom-0 left-0 w-full p-6 z-20">
+                        <div class="flex flex-col gap-2">
+                            <h3 class="font-display text-lg">Abschluss</h3>
+                            <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-white/20 to-transparent mt-2 mb-2"></div>
+                            <div class="flex justify-between items-center text-[11px] text-white/50 font-mono">
+                                <span class="flex items-center gap-1.5">DATEV Export</span>
+                                <span class="flex items-center gap-1.5">Steuerberater Happy</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: 3D SERVICES / DETAILS -->
+    <section class="z-10 bg-[#050509] border-white/5 border-t pt-16 md:pt-40 px-4 md:px-6 pb-0 relative" id="features">
+        <div class="max-w-7xl mr-auto ml-auto gap-x-4 gap-y-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-24">
+                <div class="lg:sticky md:top-32 lg:mb-0 h-fit mb-12 relative top-0">
+                    <h2 class="md:text-5xl lg:text-6xl md:mb-8 text-4xl font-medium text-white tracking-tight font-display mb-6">Dein <br>Autopilot</h2>
+                    <p class="text-base md:text-lg text-yellow-400 text-justify max-w-md mb-8 md:mb-12">
+                        TaxFlow ersetzt Schuhkartons und Excel-Listen durch eine intelligente KI-Pipeline, die deine Buchhaltung auf Autopilot schaltet.
+                    </p>
+                    <ul class="space-y-3 md:space-y-4 text-sm md:text-base">
+                        <li class="flex text-yellow-400 gap-x-4 gap-y-4 items-center font-medium">Automatische Erfassung via E-Mail</li>
+                        <li class="flex text-yellow-500 gap-x-4 gap-y-4 items-center font-medium">KI-gestützte Kategorisierung</li>
+                        <li class="flex text-yellow-500 gap-x-4 gap-y-4 items-center font-medium">Zentrales Archiv & Dashboard</li>
+                    </ul>
+                </div>
+
+                <div class="flex flex-col gap-8 md:gap-12 pb-16">
+                    
+                    <!-- Card 1: CONNECT -->
+                    <div class="card-3d-wrap group h-auto min-h-[400px] md:h-[450px] w-full cursor-pointer hover-trigger">
+                        <div class="card-3d-inner relative w-full h-full border rounded-2xl p-4 md:p-10 flex flex-col justify-between shadow-2xl overflow-hidden bg-noise default border-white/10">
+                            
+                            <!-- Visual: Data Flow -->
+                            <div class="card-element relative w-full h-48 md:h-64 border bg-[#0f0f0f]/80 backdrop-blur-sm rounded-xl overflow-hidden mb-6 flex items-center justify-center border-white/10">
+                                <svg class="absolute inset-0 w-full h-full z-0 pointer-events-none" preserveAspectRatio="none" viewBox="0 0 400 256">
+                                    <path d="M70 85 C 130 85, 130 128, 200 128" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-dasharray="4 4"></path>
+                                    <path d="M70 171 C 130 171, 130 128, 200 128" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-dasharray="4 4"></path>
+                                    <path d="M200 128 C 270 128, 270 128, 330 128" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"></path>
+                                    <circle r="2" fill="#eab308" class="opacity-80">
+                                        <animateMotion repeatCount="indefinite" dur="3s" keyPoints="0;1" keyTimes="0;1" path="M70 85 C 130 85, 130 128, 200 128"></animateMotion>
+                                    </circle>
+                                </svg>
+
+                                <div class="relative z-10 w-full h-full flex items-center justify-between px-2 md:px-10">
+                                    <div class="flex flex-col gap-4 md:gap-10">
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-[#0A0A0A] border border-white/10">
+                                            <span class="text-xs font-bold text-blue-400">G</span>
+                                            <div class="hidden sm:block text-[9px] uppercase">Gmail</div>
+                                        </div>
+                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-[#0A0A0A] border border-white/10">
+                                            <span class="text-xs font-bold text-blue-600">O</span>
+                                            <div class="hidden sm:block text-[9px] uppercase">Outlook</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1a1a1a] to-black border border-white/20 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-white"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                                    </div>
+
+                                    <div class="flex items-center gap-3 p-2 rounded-lg bg-[#0A0A0A] border border-white/10">
+                                        <span class="text-xs font-bold text-green-500">✓</span>
+                                        <div class="hidden sm:block text-[9px] uppercase">Erfasst</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-element relative z-10">
+                                <h3 class="text-2xl md:text-3xl font-medium text-white font-display mb-2 tracking-tight">E-Mail Integration</h3>
+                                <p class="text-yellow-500 max-w-sm text-sm md:text-base">Einmalige Verbindung. Ab dann scannt unser System deinen Posteingang nach Rechnungen, ohne dass du etwas tun musst.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: AI ENGINE -->
+                    <div class="card-3d-wrap group cursor-pointer hover-trigger w-full h-auto min-h-[400px] md:h-[450px]">
+                        <div class="card-3d-inner relative w-full h-full border rounded-2xl p-4 md:p-10 flex flex-col justify-between shadow-2xl overflow-hidden bg-noise default border-white/10">
+                            
+                            <!-- Visual: Terminal -->
+                            <div class="card-element w-full h-48 md:h-64 mb-6 relative perspective-1000">
+                                <div class="w-full h-full bg-[#050505] border border-white/10 rounded-xl overflow-hidden flex flex-col shadow-2xl relative group hover:-translate-y-1 transition-transform duration-500">
+                                    <div class="h-8 border-b border-white/5 flex items-center px-4 bg-white/[0.02] justify-between">
+                                        <div class="flex gap-1.5">
+                                            <div class="w-2.5 h-2.5 rounded-full bg-[#FF5F56]/20"></div>
+                                            <div class="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]/20"></div>
+                                            <div class="w-2.5 h-2.5 rounded-full bg-[#27C93F]/20"></div>
+                                        </div>
+                                        <div class="text-[9px] font-mono text-white/30 flex items-center gap-2">
+                                            <span>tax_ai.py</span>
+                                            <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 p-4 font-mono text-[10px] text-green-400/80 leading-relaxed overflow-hidden">
+                                        <div class="animate-pulse">
+                                            > Initializing OCR module...<br>
+                                            > Reading file: invoice_hosting.pdf<br>
+                                            > Extracting: 12.03.2025 | € 240,00<br>
+                                            > Match found: Hosting / IT-Infrastruktur<br>
+                                            > Tax rate: 19% (Reverse Charge check)<br>
+                                            > Status: Validated.<br>
+                                            > Saving to database...<br>
+                                            <span class="text-white">_</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-element relative z-10">
+                                <h3 class="text-2xl md:text-3xl font-medium text-white font-display mb-2 tracking-tight">Intelligente Kategorisierung</h3>
+                                <p class="text-yellow-500 max-w-sm text-sm md:text-base">Unsere KI versteht den Kontext. Software-Abo? Reisekosten? Bewirtung? Alles wird korrekt verbucht.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: CENTRAL HUB -->
+                    <div class="card-3d-wrap group cursor-pointer hover-trigger w-full h-auto min-h-[400px] md:h-[450px]">
+                        <div class="card-3d-inner flex flex-col overflow-hidden default w-full h-full border-white/10 border rounded-2xl p-4 md:p-10 relative shadow-2xl justify-between">
+                            
+                            <!-- Visual: Hub -->
+                            <div class="card-element relative w-full h-48 md:h-64 border bg-[#050505]/80 backdrop-blur-sm rounded-xl overflow-hidden mb-6 flex items-center justify-center border-white/10">
+                                <div class="relative w-full h-full flex items-center justify-center scale-75 md:scale-100">
+                                    <div class="absolute border rounded-full border-white/5 w-64 h-64 animate-[spin_20s_linear_infinite]"></div>
+                                    <div class="relative z-10 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                                    </div>
+                                    <!-- Nodes -->
+                                    <div class="absolute top-1/4 right-1/4">
+                                        <div class="px-2 py-1 bg-green-500/10 border border-green-500/40 rounded text-[9px] text-green-400">DATEV</div>
+                                    </div>
+                                    <div class="absolute bottom-1/3 left-1/4">
+                                        <div class="px-2 py-1 bg-blue-500/10 border border-blue-500/40 rounded text-[9px] text-blue-400">ELSTER</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-element relative z-10">
+                                <h3 class="text-2xl md:text-3xl font-medium text-white font-display mb-2 tracking-tight">Zentrales Archiv</h3>
+                                <p class="text-yellow-500 max-w-sm text-sm md:text-base">Alles an einem Ort. Suche nach Beträgen, Daten oder Anbietern in Sekunden. Exportfertig für den Steuerberater.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: TESTIMONIALS -->
+    <section class="md:py-32 md:px-6 overflow-hidden bg-black border-white/10 border-t pt-20 pr-4 pb-20 pl-4 relative" id="testimonials">
+        <div class="z-10 max-w-[1400px] mr-auto ml-auto relative">
+            <div class="text-center mb-12 md:mb-20">
+                <h2 class="text-3xl md:text-6xl font-medium text-white font-display mb-4 md:mb-6 tracking-tight">Kundenstimmen</h2>
+                <p class="uppercase text-xs text-yellow-500 tracking-widest">Stressfrei durch das Steuerjahr</p>
+            </div>
+
+            <!-- Testimonial Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                <!-- Person 1 -->
+                <div class="group relative rounded-2xl overflow-hidden aspect-[9/16] border border-white/10 bg-[#0A0A0A] transition-transform duration-500 hover:-translate-y-2">
+                    <div class="absolute inset-0 w-full h-full bg-gray-900">
+                         <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80" class="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700">
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 transition-opacity duration-300"></div>
+                    <div class="absolute bottom-0 left-0 w-full p-6 md:p-8 z-20">
+                        <p class="text-lg text-white mb-4">"Endlich kein Suchen mehr nach fehlenden Belegen. TaxFlow hat mir sicher 5 Stunden im Monat gespart."</p>
+                        <div class="flex items-center gap-4 border-t border-white/10 pt-4">
+                            <div class="">
+                                <div class="text-sm font-medium text-white">Julia M.</div>
+                                <div class="uppercase text-xs text-yellow-500 tracking-wider">Freelancerin</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Person 2 -->
+                <div class="group relative rounded-2xl overflow-hidden aspect-[9/16] border border-white/10 bg-[#0A0A0A] transition-transform duration-500 hover:-translate-y-2 md:-mt-12">
+                     <div class="absolute inset-0 w-full h-full bg-gray-900">
+                         <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&q=80" class="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700">
+                    </div>
+                     <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 transition-opacity duration-300"></div>
+                    <div class="absolute bottom-0 left-0 w-full p-6 md:p-8 z-20">
+                         <p class="text-lg text-white mb-4">"Mein Steuerberater liebt die Exporte. Alles sauber kategorisiert und GoBD konform."</p>
+                        <div class="flex items-center gap-4 border-t border-white/10 pt-4">
+                            <div class="">
+                                <div class="text-sm font-medium text-white">Thomas K.</div>
+                                <div class="text-xs uppercase tracking-wider text-yellow-500">Agentur Inhaber</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Person 3 -->
+                <div class="group relative rounded-2xl overflow-hidden aspect-[9/16] border border-white/10 bg-[#0A0A0A] transition-transform duration-500 hover:-translate-y-2">
+                     <div class="absolute inset-0 w-full h-full bg-gray-900">
+                         <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80" class="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700">
+                    </div>
+                     <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 transition-opacity duration-300"></div>
+                    <div class="absolute bottom-0 left-0 w-full p-6 md:p-8 z-20">
+                         <p class="text-lg text-white mb-4">"Das Dashboard gibt mir endlich einen Überblick über meine Ausgaben in Echtzeit."</p>
+                        <div class="flex items-center gap-4 border-t border-white/10 pt-4">
+                            <div class="">
+                                <div class="text-sm font-medium text-white">Sarah L.</div>
+                                <div class="text-xs uppercase tracking-wider text-yellow-500">Shopify Händlerin</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5: WAITLIST / FOOTER -->
+    <footer class="relative overflow-hidden bg-[#050509] border-t pt-16 md:pt-24 pb-8 md:pb-12 border-white/5" id="waitlist">
+        <!-- Decoration -->
+        <div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent to-transparent opacity-50 via-white/20"></div>
+        <div class="absolute -top-[150px] left-1/2 -translate-x-1/2 w-[300px] md:w-[600px] h-[300px] blur-[80px] rounded-full pointer-events-none mix-blend-screen bg-white/5"></div>
+
+        <div class="max-w-[1400px] mx-auto px-4 md:px-6 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-16 md:mb-20">
+                <!-- Brand -->
+                <div class="lg:col-span-1 space-y-6">
+                    <a href="#" class="flex items-center gap-3">
+                         <div class="flex overflow-hidden bg-center text-black bg-white w-8 h-8 items-center justify-center rounded-sm font-bold font-display">T</div>
+                        <span class="text-lg font-bold text-white tracking-tight font-display">TAX<span class="font-light text-yellow-500">FLOW</span></span>
+                    </a>
+                    <p class="text-sm leading-relaxed max-w-xs text-yellow-400">
+                        Die Zukunft der vorbereitenden Buchhaltung für Kleinunternehmer und Selbstständige.
+                    </p>
+                </div>
+
+                <!-- Empty space or extra links -->
+                <div class="lg:col-span-2 hidden lg:block"></div>
+
+                <!-- Waitlist Form -->
+                <div class="lg:col-span-1">
+                    <h4 class="text-xs font-bold uppercase tracking-widest mb-6 text-white">Early Access sichern</h4>
+                    <form class="relative" onsubmit="event.preventDefault(); alert('Danke! Du stehst auf der Liste.');">
+                        <input type="email" placeholder="Deine E-Mail Adresse" required class="focus:outline-none focus:border-yellow-500 transition-colors text-sm text-white bg-white/5 w-full border-white/10 border rounded-lg pt-3 pr-12 pb-3 pl-4">
+                        <button type="submit" class="absolute right-2 top-2 p-1 rounded transition-colors bg-white text-black hover:bg-yellow-400">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[16px] h-[16px]"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                    </form>
+                    <p class="text-[10px] text-white/30 mt-2">Wir starten in Q3 2025. Kein Spam.</p>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4 border-white/10">
+                <div class="text-[10px] uppercase text-yellow-600 tracking-widest text-center md:text-left">© 2025 TaxFlow SaaS. Made in Germany.</div>
+                <div class="flex gap-6 text-[10px] uppercase tracking-widest text-yellow-600">
+                    <a href="#" class="transition-colors hover:text-yellow-400">Impressum</a>
+                    <a href="#" class="transition-colors hover:text-yellow-400">Datenschutz</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        // 1. LIGHTER SMOOTH SCROLL CONFIG
+        const lenis = new Lenis({
+            duration: 0.8,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 0.8,
+            smoothTouch: false,
+            touchMultiplier: 2,
+        })
+
+        function raf(time) {
+            lenis.raf(time)
+            requestAnimationFrame(raf)
+        }
+        requestAnimationFrame(raf)
+
+        // Connect GSAP to Lenis
+        gsap.registerPlugin(ScrollTrigger);
+        
+        // 2. Custom Cursor Logic (Only on Desktop)
+        if (window.matchMedia("(pointer: fine)").matches) {
+            const cursor = document.getElementById('cursor');
+            const hoverTriggers = document.querySelectorAll('.hover-trigger');
+            
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+
+            hoverTriggers.forEach(el => {
+                el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+                el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+            });
+        }
+
+        // 3. CANVAS ANIMATION
+        const canvas = document.getElementById('hero-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let streams = [];
+        const gap = 40; 
+
+        class Stream {
+            constructor(x) {
+                this.x = x;
+                this.y = Math.random() * height;
+                this.speed = Math.random() * 2 + 0.5;
+                this.length = Math.random() * 100 + 50;
+                this.opacity = Math.random() * 0.3 + 0.05;
+            }
+            update() {
+                this.y -= this.speed;
+                if (this.y + this.length < 0) {
+                    this.y = height + Math.random() * 100;
+                    this.speed = Math.random() * 2 + 0.5;
+                }
+            }
+            draw(ctx) {
+                ctx.strokeStyle = `rgba(255, 255, 255, 0.03)`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(this.x, 0);
+                ctx.lineTo(this.x, height);
+                ctx.stroke();
+
+                const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.length);
+                gradient.addColorStop(0, `rgba(255, 255, 255, 0)`);
+                gradient.addColorStop(0.5, `rgba(255, 255, 255, ${this.opacity})`);
+                gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(this.x - 1, this.y, 3, this.length);
+            }
+        }
+
+        function initCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            streams = [];
+            for (let x = gap / 2; x < width; x += gap) {
+                streams.push(new Stream(x));
+            }
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+            streams.forEach(s => {
+                s.update();
+                s.draw(ctx);
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+        animateCanvas();
+
+        // 4. Hero Text Mask Animation
+        const headings = document.querySelectorAll('.mask-text span');
+        headings.forEach((h, i) => {
+            gsap.to(h, {
+                y: 0,
+                duration: 1.2,
+                ease: "power3.out",
+                delay: i * 0.1
+            });
+        });
+
+        gsap.to(".animate-fade-in", { opacity: 1, duration: 1, delay: 0.5 });
+        gsap.to(".animate-fade-up", { opacity: 1, y: 0, duration: 1, delay: 0.8, ease: "power2.out" });
+
+        // 5. 3D Card Tilt
+        if (window.matchMedia("(hover: hover)").matches) {
+            const cards3d = document.querySelectorAll('.card-3d-wrap');
+            cards3d.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = ((y - centerY) / centerY) * -10;
+                    const rotateY = ((x - centerX) / centerX) * 10;
+
+                    const inner = card.querySelector('.card-3d-inner');
+                    inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    const inner = card.querySelector('.card-3d-inner');
+                    inner.style.transform = `rotateX(0deg) rotateY(0deg)`;
+                });
+            });
+        }
+        
+        function toggleMobileMenu() {
+            const menu = document.querySelector('.mobile-menu');
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
+        }
+
+    </script>
 
 </body>
 </html>
