@@ -42,7 +42,7 @@ cursor: none; /* System Cursor verstecken */
     background: radial-gradient(circle closest-side, rgba(250, 204, 21, 0.1), transparent);
     transform: translate(-50%, -50%);
     pointer-events: none;
-    z-index: 9998; /* Unter dem Shifter, aber über Content */
+    z-index: 9998; 
     mix-blend-mode: screen;
     will-change: left, top;
     transition: opacity 0.3s ease;
@@ -56,9 +56,9 @@ cursor: none; /* System Cursor verstecken */
     background-color: white;
     border-radius: 50%;
     pointer-events: none;
-    z-index: 10000; /* Ganz oben */
+    z-index: 10000; 
     transform: translate(-50%, -50%);
-    mix-blend-mode: exclusion; /* Kontrast */
+    mix-blend-mode: exclusion; 
     transition: 
         width 0.3s cubic-bezier(0.19, 1, 0.22, 1),
         height 0.3s cubic-bezier(0.19, 1, 0.22, 1),
@@ -70,7 +70,6 @@ cursor: none; /* System Cursor verstecken */
     will-change: left, top, width, height;
 }
 
-/* Text im Cursor */
 #context-cursor::after {
     content: '';
     opacity: 0;
@@ -83,9 +82,7 @@ cursor: none; /* System Cursor verstecken */
     transition: opacity 0.2s ease;
 }
 
-/* --- STATES (DEUTSCHE BEGRIFFE) --- */
-
-/* 1. Interaktiv (Links/Buttons) -> "KLICK" */
+/* --- STATES --- */
 body.cursor-hover #context-cursor {
     width: 60px; height: 60px;
     background-color: white;
@@ -96,17 +93,15 @@ body.cursor-hover #context-cursor::after {
     opacity: 1;
 }
 
-/* 2. Text -> I-Beam */
 body.cursor-text #context-cursor {
     width: 2px; height: 24px;
     border-radius: 2px;
     background-color: #FACC15;
 }
 
-/* 3. Scan Karte -> "SCAN" */
 body.cursor-scan #context-cursor {
     width: 80px; height: 80px;
-    background-color: rgba(250, 204, 21, 0.9); /* Gelb */
+    background-color: rgba(250, 204, 21, 0.9); 
     mix-blend-mode: normal;
     border-radius: 20px; 
 }
@@ -116,10 +111,9 @@ body.cursor-scan #context-cursor::after {
     opacity: 1;
 }
 
-/* 4. AI Karte -> "ANALYSE" */
 body.cursor-ai #context-cursor {
     width: 80px; height: 80px;
-    background-color: rgba(59, 130, 246, 0.9); /* Blau */
+    background-color: rgba(59, 130, 246, 0.9); 
     mix-blend-mode: normal;
     border-radius: 50%;
 }
@@ -129,10 +123,9 @@ body.cursor-ai #context-cursor::after {
     opacity: 1;
 }
 
-/* 5. Save Karte -> "SICHERN" */
 body.cursor-save #context-cursor {
     width: 80px; height: 80px;
-    background-color: rgba(34, 197, 94, 0.9); /* Grün */
+    background-color: rgba(34, 197, 94, 0.9); 
     mix-blend-mode: normal;
     border-radius: 10px;
 }
@@ -141,7 +134,6 @@ body.cursor-save #context-cursor::after {
     color: white;
     opacity: 1;
 }
-
 
 /* --- TYPOGRAPHY --- */
 .font-display { font-family: 'Space Grotesk', sans-serif; }
@@ -217,6 +209,32 @@ animation: code-type 2s steps(20, end) infinite alternate;
     animation: success-pulse 2s ease-in-out infinite;
     animation-delay: 1s;
 }
+
+/* MODAL UTILITIES */
+.modal-backdrop {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(12px);
+    z-index: 10001; /* Über dem Cursor */
+    cursor: pointer; 
+}
+.modal-content {
+    cursor: default; 
+}
+/* Scrollbar for modal */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: #1a1a1a; 
+  border-radius: 4px;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: #333; 
+  border-radius: 4px;
+}
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
 </style>
 <script>
 tailwind.config = {
@@ -255,7 +273,7 @@ plugins: []
     <nav class="fixed transition-transform duration-300 z-50 pt-4 px-4 md:pt-6 md:px-6 top-0 right-0 left-0" id="navbar">
         <div class="flex flex-col glass max-w-[1600px] rounded-[24px] md:rounded-full mr-auto ml-auto px-4 py-3 md:px-8 items-center justify-between transition-all duration-300">
             <div class="flex w-full items-center justify-between">
-                <!-- LOGO FIX: Added pointer-events-none to text so hover works on parent 'a' -->
+                <!-- LOGO FIX: Added pointer-events-none to text -->
                 <a href="#" class="flex items-center gap-3 group hover-trigger" data-cursor="hover">
                     <div class="flex overflow-hidden bg-center text-black bg-white w-7 h-7 md:w-8 md:h-8 items-center justify-center rounded-sm font-bold font-display">
                         B
@@ -292,21 +310,15 @@ plugins: []
 
         <div class="z-10 text-center max-w-[1400px] mr-auto ml-auto relative gap-x-12 gap-y-16 flex flex-col items-center">
             
-            <!-- Badge -->
-            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full border backdrop-blur-md mb-8 md:mb-12 opacity-0 animate-fade-in border-white/10 bg-white/5" style="opacity: 1;">
-                <span class="w-1.5 h-1.5 rounded-full animate-pulse bg-white"></span>
-                <span class="text-[10px] uppercase font-medium tracking-[0.2em] text-yellow-300">Warteliste geöffnet</span>
-            </div>
-
             <!-- Headline -->
-            <h1 class="font-display text-5xl sm:text-6xl md:text-8xl lg:text-[6.5rem] font-medium tracking-tighter leading-[0.95] mb-8 md:mb-12 mix-blend-difference text-white" data-cursor="text">
+            <h1 class="font-display text-5xl sm:text-6xl md:text-8xl lg:text-[6.5rem] font-medium tracking-tighter leading-[0.95] mb-8 md:mb-12 mix-blend-difference text-white mt-24" data-cursor="text">
                 <span class="mask-text"><span>EINGANGS</span></span>
                 <span class="mask-text"><span class="text-yellow-500">RECHNUNGEN</span></span>
                 <span class="mask-text"><span>AUTOMATISIERT</span></span>
             </h1>
 
             <!-- Subline + Stats -->
-            <div class="flex flex-col md:flex-row items-center justify-between w-full max-w-4xl mx-auto mt-8 md:mt-12 border-t pt-8 opacity-0 animate-fade-up border-white/10">
+            <div class="flex flex-col md:flex-row items-center justify-between w-full max-w-4xl mx-auto border-t pt-8 opacity-0 animate-fade-up border-white/10">
                 <p class="text-sm text-yellow-400 text-center md:text-left max-w-sm mb-8 md:mb-0" data-cursor="text">
                     Verbinde dein E-Mail-Konto. Beleg.Butler erkennt eingehende Rechnungen, kategorisiert sie vollautomatisch und legt sie zentral für dich im Dashboard ab.
                 </p>
@@ -322,9 +334,16 @@ plugins: []
                 </div>
             </div>
 
-            <!-- NEU: Direkte Anmeldung (Eingabefeld) -->
-            <div class="w-full max-w-md mt-16 animate-fade-up opacity-0 hover-trigger" style="animation-delay: 0.6s;">
-                <form class="relative group" onsubmit="event.preventDefault(); alert('Danke! Du bist auf der Liste.');">
+            <!-- NEU: Direkte Anmeldung (Eingabefeld) MIT Badge darüber -->
+            <div class="w-full max-w-md mt-16 mb-12 animate-fade-up opacity-0 flex flex-col items-center gap-4" style="animation-delay: 0.6s;">
+                
+                <!-- Badge (Cursor Neutralized) -->
+                <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full border backdrop-blur-md opacity-100 animate-fade-in border-white/10 bg-white/5 cursor-default">
+                    <span class="w-1.5 h-1.5 rounded-full animate-pulse bg-white"></span>
+                    <span class="text-[10px] uppercase font-medium tracking-[0.2em] text-yellow-300">Warteliste geöffnet</span>
+                </div>
+
+                <form class="relative group w-full" onsubmit="event.preventDefault(); alert('Danke! Du bist auf der Liste.');">
                     <!-- Glow Effect -->
                     <div class="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
                     
@@ -335,7 +354,7 @@ plugins: []
                         </button>
                     </div>
                 </form>
-                <p class="text-center text-[10px] text-white/30 mt-3 uppercase tracking-widest">Early Access Q3 2025 • Kostenlos vormerken</p>
+                <p class="text-center text-[10px] text-white/30 uppercase tracking-widest">Early Access Q1 2026 • Kostenlos vormerken</p>
             </div>
 
         </div>
@@ -621,20 +640,128 @@ plugins: []
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[16px] h-[16px]"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </button>
                     </form>
-                    <p class="text-[10px] text-white/30 mt-2">Wir starten in Q3 2025. Kein Spam.</p>
+                    <p class="text-[10px] text-white/30 mt-2">Wir starten in Q1 2026. Kein Spam.</p>
                 </div>
             </div>
 
             <!-- Bottom Bar -->
             <div class="pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4 border-white/10">
-                <div class="text-[10px] uppercase text-yellow-600 tracking-widest text-center md:text-left">© 2025 Beleg.Butler. Made in Germany.</div>
+                <div class="text-[10px] uppercase text-yellow-600 tracking-widest text-center md:text-left">© 2026 Beleg.Butler. Made in Germany.</div>
                 <div class="flex gap-6 text-[10px] uppercase tracking-widest text-yellow-600">
-                    <a href="#" class="transition-colors hover:text-yellow-400" data-cursor="hover">Impressum</a>
-                    <a href="#" class="transition-colors hover:text-yellow-400" data-cursor="hover">Datenschutz</a>
+                    <button onclick="document.getElementById('modal-impressum').classList.remove('hidden')" class="hover:text-yellow-400 transition-colors" data-cursor="hover">Impressum</button>
+                    <button onclick="document.getElementById('modal-datenschutz').classList.remove('hidden')" class="hover:text-yellow-400 transition-colors" data-cursor="hover">Datenschutz</button>
                 </div>
             </div>
         </div>
     </footer>
+
+    <!-- MODAL: IMPRESSUM -->
+    <!-- click event added to backdrop to close modal -->
+    <div id="modal-impressum" class="hidden fixed inset-0 z-[100] flex items-center justify-center modal-backdrop p-4" onclick="if(event.target === this) this.classList.add('hidden')">
+        <!-- data-lenis-prevent added to allow native scroll inside modal -->
+        <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-8 relative shadow-2xl modal-content" data-lenis-prevent>
+            <button onclick="document.getElementById('modal-impressum').classList.add('hidden')" class="absolute top-4 right-4 text-white/50 hover:text-white" data-cursor="hover">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h2 class="text-2xl font-display font-bold text-white mb-6">Impressum</h2>
+            <div class="space-y-4 text-sm text-gray-300">
+                <p>Willkommen bei Beleg.Butler (ein Angebot von Simple.Grow).</p>
+                <p><strong>Angaben gemäß § 5 DDG:</strong><br>
+                SimpleGrow (Inhaber: David Proga)<br>
+                c/o Impressumservice Dein-Impressum<br>
+                Stettiner Straße 41<br>
+                35410 Hungen<br>
+                (Bitte versenden Sie keine Pakete an diese Adresse)</p>
+
+                <p><strong>Kontakt:</strong><br>
+                Telefon: +49 (0) 174 6629095<br>
+                E-Mail: david.proga@simplegrow.io<br>
+                Vertreten durch: David Proga</p>
+
+                <p><strong>EU-Streitschlichtung:</strong><br>
+                Die Europäische Kommission stellt eine Plattform für die Online-Streitbeilegung (OS) bereit: <a href="https://ec.europa.eu/consumers/odr/" target="_blank" class="underline">https://ec.europa.eu/consumers/odr/</a>.<br>
+                Meine E-Mail-Adresse finden Sie oben im Impressum.</p>
+
+                <p><strong>Verbraucherstreitbeilegung/Universalschlichtungsstelle:</strong><br>
+                Ich bin nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+
+                <p><strong>Haftung für Inhalte:</strong><br>
+                Als Diensteanbieter bin ich gemäß § 7 Abs.1 DDG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG bin ich als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen...</p>
+                
+                <p><strong>Urheberrecht:</strong><br>
+                Die durch den Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: DATENSCHUTZ -->
+    <!-- click event added to backdrop to close modal -->
+    <div id="modal-datenschutz" class="hidden fixed inset-0 z-[100] flex items-center justify-center modal-backdrop p-4" onclick="if(event.target === this) this.classList.add('hidden')">
+        <!-- data-lenis-prevent added here as well -->
+        <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-8 relative shadow-2xl modal-content" data-lenis-prevent>
+            <button onclick="document.getElementById('modal-datenschutz').classList.add('hidden')" class="absolute top-4 right-4 text-white/50 hover:text-white" data-cursor="hover">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <h2 class="text-2xl font-display font-bold text-white mb-6">Datenschutzerklärung</h2>
+            <div class="space-y-4 text-sm text-gray-300">
+                <h3 class="font-bold text-white mt-4">1. Verantwortlicher</h3>
+                <p>Verantwortlich für die Datenverarbeitung ist:<br>
+                David Proga<br>
+                SimpleGrow<br>
+                Stettiner Str. 41, 35410 Hungen<br>
+                E-Mail: david.proga@simplegrow.io</p>
+
+                <h3 class="font-bold text-white mt-4">2. Gegenstand</h3>
+                <p>Diese Datenschutzerklärung informiert über die Verarbeitung personenbezogener Daten bei Nutzung von "Beleg.Butler". Beleg.Butler ist ein SaaS-Dienst zur automatisierten Erfassung, Analyse (OCR) und Kategorisierung von Eingangsrechnungen per E-Mail-Integration.</p>
+
+                <h3 class="font-bold text-white mt-4">3. Art der verarbeiteten Daten</h3>
+                <p>Im Rahmen der Nutzung verarbeite ich insbesondere:</p>
+                <ul class="list-disc ml-5 space-y-1">
+                    <li>Kontaktdaten (Name, E-Mail-Adresse)</li>
+                    <li>Finanz- & Rechnungsdaten (IBAN, Steuernummern, Beträge, Händlerdaten)</li>
+                    <li>Metadaten aus E-Mails (Absender, Zeitstempel)</li>
+                    <li>Dateianhänge (PDF, Bilddateien von Belegen)</li>
+                </ul>
+
+                <h3 class="font-bold text-white mt-4">4. Zweck & Rechtsgrundlage</h3>
+                <p>Die Verarbeitung erfolgt zur Vertragserfüllung (Bereitstellung des Dienstes, Analyse der Belege) gemäß Art. 6 Abs. 1 lit. b DSGVO sowie zur Wahrung berechtigter Interessen (Sicherheit, Optimierung) gemäß Art. 6 Abs. 1 lit. f DSGVO.</p>
+
+                <h3 class="font-bold text-white mt-4">5. Eingesetzte Technologien & Auftragsverarbeiter</h3>
+                <p>Ich setze folgende Dienstleister ein, um den Service zu erbringen. Alle Anbieter wurden sorgfältig ausgewählt, um höchste DSGVO-Standards zu erfüllen:</p>
+                
+                <p><strong>Microsoft Azure OpenAI Service:</strong><br>
+                Zur Extraktion von Daten aus Rechnungsdokumenten (OCR/KI-Analyse). Die Verarbeitung erfolgt ausschließlich auf Servern in <strong>Deutschland/Europa</strong>. Es werden nur die notwendigen Daten übermittelt. Keine Nutzung der Daten zum Training der Modelle durch Microsoft.</p>
+
+                <p><strong>n8n / Make.com:</strong><br>
+                Zur Automatisierung der Workflows. Ich nutze ausschließlich Serverstandorte innerhalb der <strong>Europäischen Union (EU)</strong>, um die DSGVO-Konformität sicherzustellen.</p>
+
+                <p><strong>Supabase:</strong><br>
+                Zur Speicherung und Bereitstellung der extrahierten Daten für den Nutzer (Dashboard-Datenbank). Hosting erfolgt in <strong>Deutschland/EU</strong> (AWS Frankfurt).</p>
+
+                <p><strong>E-Mail Provider:</strong><br>
+                Zur Entgegennahme der weitergeleiteten Rechnungen.</p>
+
+                <h3 class="font-bold text-white mt-4">6. Datensicherheit & Verantwortung</h3>
+                <p>Die rechtliche Verantwortung für die Aufbewahrung der Belege (GoBD) verbleibt beim Nutzer. Beleg.Butler dient als technisches Hilfsmittel zur Vorbereitung.</p>
+
+                <h3 class="font-bold text-white mt-4">7. Speicherdauer & Rechte</h3>
+                <p>Ich speichere Daten nur so lange wie nötig. Sie haben das Recht auf Auskunft, Löschung und Berichtigung Ihrer Daten. Kontaktieren Sie mich hierfür unter der oben genannten E-Mail.</p>
+
+                <hr class="border-white/10 my-6">
+
+                <h2 class="text-xl font-display font-bold text-white mb-4">Auftragsverarbeitungsvertrag (AVV) – Information</h2>
+                <p>Da Beleg.Butler personenbezogene Daten (u.a. von Ihren Lieferanten auf den Rechnungen) in Ihrem Auftrag verarbeitet, agiere ich als Auftragsverarbeiter gemäß Art. 28 DSGVO.</p>
+                <p>Ich verpflichte mich zur Einhaltung aller Vorgaben der DSGVO, insbesondere:</p>
+                <ul class="list-disc ml-5 space-y-1">
+                    <li>Verarbeitung nur auf Weisung</li>
+                    <li>Verpflichtung auf Vertraulichkeit</li>
+                    <li>Einsatz technischer Schutzmaßnahmen (Verschlüsselung)</li>
+                    <li>Unterstützung bei Betroffenenrechten</li>
+                </ul>
+                <p>Detaillierte AVV-Verträge werden bei Vertragsabschluss (Start der Beta/Live-Betrieb) bereitgestellt.</p>
+            </div>
+        </div>
+    </div>
 
     <!-- SCRIPTS -->
     <script>
