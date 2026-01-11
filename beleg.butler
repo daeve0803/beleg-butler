@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="de" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaxFlow - Steuererklärung auf Autopilot</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Geist', 'sans-serif'],
+      },
+      colors: {
+        neutral: {
+          50: '#fafafa',
+          100: '#f5f5f5',
+          200: '#e5e5e5',
+          300: '#d4d4d4',
+          400: '#a3a3a3',
+          500: '#737373',
+          600: '#525252',
+          700: '#404040',
+          800: '#262626',
+          900: '#171717',
+        }
+      },
+      animation: {
+        'clip-in': 'clipIn 1.2s cubic-bezier(0.25, 1, 0.5, 1) both',
+        'fade-up': 'fadeUp 0.8s ease-out forwards',
+      },
+      keyframes: {
+        clipIn: {
+          '0%': { opacity: '0', clipPath: 'inset(0 0 100% 0)' },
+          '100%': { opacity: '1', clipPath: 'inset(0 0 0 0)' },
+        },
+        fadeUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        }
+      }
+    }
+  }
+}
+</script>
+<style>
+/* Custom Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+/* Vertical Lines Background */
+.grid-lines {
+  background-size: 20% 100%;
+  background-image: linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px);
+}
+/* Button Shine Effect */
+.glass-button {
+  background: linear-gradient(-75deg, rgba(23, 23, 23, 1), rgba(40, 40, 40, 1));
+  color: white;
+  transition: all 400ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+.glass-button:hover {
+  transform: scale(0.98);
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>.font-geist { font-family: 'Geist', sans-serif !important; }</style>
+</head>
+<body class="min-h-screen overflow-x-hidden selection:bg-neutral-300 selection:text-neutral-900 text-neutral-900 bg-neutral-100 relative font-geist">
+
+    <!-- Background Grid Lines -->
+    <div class="fixed grid-lines w-full h-full top-0 right-0 bottom-0 left-0 pointer-events-none"></div>
+
+    <div class="relative z-10 flex flex-col lg:flex-row min-h-screen max-w-[1600px] mx-auto">
+        
+        <!-- Sidebar / Navigation (Simplified for One-Page) -->
+        <aside class="lg:w-64 lg:fixed lg:h-screen flex flex-col z-50 glass-panel lg:bg-transparent lg:backdrop-blur-none lg:border-none lg:border-r w-full border-neutral-200/50 border-b pt-8 pr-8 pb-8 pl-8 justify-between">
+            <div>
+                <div class="mb-12 animate-clip-in" style="animation-delay: 0.1s;">
+                    <a href="#" class="block text-2xl tracking-tighter font-semibold group">
+                        Tax<span class="text-neutral-400 group-hover:text-neutral-900 transition-colors">Flow</span>
+                    </a>
+                </div>
+
+                <nav class="space-y-4 animate-clip-in" style="animation-delay: 0.2s;">
+                    <a href="#hero" class="block text-lg text-neutral-900 font-medium hover:translate-x-1 transition-transform cursor-pointer">Start</a>
+                    <a href="#problem" class="block text-lg text-neutral-500 hover:text-neutral-900 hover:translate-x-1 transition-all cursor-pointer">Das Problem</a>
+                    <a href="#features" class="block text-lg text-neutral-500 hover:text-neutral-900 hover:translate-x-1 transition-all cursor-pointer">Funktionen</a>
+                    <a href="#how-it-works" class="block text-lg text-neutral-500 hover:text-neutral-900 hover:translate-x-1 transition-all cursor-pointer">So geht's</a>
+                </nav>
+            </div>
+
+            <div class="hidden lg:block space-y-2 animate-clip-in" style="animation-delay: 0.3s;">
+                <div class="text-sm leading-tight text-neutral-400">
+                    <p>Early Access</p>
+                    <p>2025 Edition</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 lg:ml-64 lg:p-16 flex flex-col gap-24 overflow-hidden pt-6 pr-6 pb-6 pl-6">
+
+            <!-- Hero Section -->
+            <section id="hero" class="grid grid-cols-1 lg:grid-cols-12 gap-12 pt-10 min-h-[80vh] items-center">
+                <div class="animate-clip-in lg:col-span-8 pb-4 space-y-8" style="animation-delay: 0.4s">
+                    <div class="inline-block px-3 py-1 rounded-full border border-neutral-300 bg-white text-xs font-medium text-neutral-600 mb-2">
+                        Warteliste jetzt geöffnet
+                    </div>
+                    <h1 class="leading-[0.95] lg:text-7xl xl:text-7xl text-5xl font-medium text-neutral-900 tracking-tight">
+                        Nie wieder Stress mit der jährlichen Steuererklärung.
+                    </h1>
+                    <p class="leading-snug lg:text-xl text-lg font-normal text-neutral-500 max-w-2xl">
+                        Schluss mit Schuhkartons voller Belege. TaxFlow kategorisiert deine Rechnungen vollautomatisch und bereitet alles perfekt für deinen Steuerberater vor. Speziell für Kleinunternehmer.
+                    </p>
+                    
+                    <!-- Waitlist Form -->
+                    <div class="max-w-md mt-8">
+                        <form class="flex flex-col sm:flex-row gap-3">
+                            <input type="email" placeholder="deine@email.de" required class="flex-1 px-4 py-3.5 rounded-xl border border-neutral-300 bg-white/50 backdrop-blur focus:outline-none focus:ring-2 focus:ring-neutral-900 transition-all placeholder:text-neutral-400">
+                            <button type="submit" class="glass-button cursor-pointer outline-none focus:outline-none z-30 pointer-events-auto text-base rounded-xl relative px-6 py-3.5 font-medium tracking-tight">
+                                Auf die Liste
+                            </button>
+                        </form>
+                        <p class="text-xs text-neutral-400 mt-3">Beitritt völlig unverbindlich. Wir spammen nicht.</p>
+                    </div>
+                </div>
+
+                <!-- Abstract Visual -->
+                <div class="hidden lg:flex lg:col-span-4 animate-clip-in justify-center items-center" style="animation-delay: 0.5s">
+                   <div class="relative w-full aspect-square bg-gradient-to-tr from-neutral-200 to-neutral-100 rounded-full blur-3xl opacity-60"></div>
+                   <div class="absolute glass-panel p-6 rounded-2xl shadow-xl max-w-xs rotate-3 animate-fade-up" style="animation-delay: 0.8s">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span class="text-xs text-neutral-400">Gerade eben</span>
+                        </div>
+                        <p class="text-sm font-medium text-neutral-900">Rechnung #4029 automatisch kategorisiert</p>
+                        <p class="text-xs text-neutral-500 mt-1">Kategorie: Bürobedarf • GoBD konform archiviert</p>
+                   </div>
+                </div>
+            </section>
+
+            <!-- Problem / Stats Section -->
+            <section id="problem" class="animate-fade-up w-full" style="animation-delay: 0.6s">
+                <div class="grid grid-cols-1 md:grid-cols-3 bg-white border border-neutral-200 rounded-3xl p-2 gap-2">
+                    <div class="bg-neutral-50 p-8 rounded-2xl border border-neutral-100">
+                        <h3 class="text-3xl font-medium text-neutral-900 mb-2">40 Std.</h3>
+                        <p class="text-[15px] leading-relaxed text-neutral-500">Verbringen Selbstständige durchschnittlich pro Jahr nur mit dem Sortieren von Belegen.</p>
+                    </div>
+                    <div class="bg-neutral-50 p-8 rounded-2xl border border-neutral-100">
+                        <h3 class="text-3xl font-medium text-neutral-900 mb-2">Chaos</h3>
+                        <p class="text-[15px] leading-relaxed text-neutral-500">E-Mail Anhänge, Downloads, Briefpost. Belege sind überall verstreut.</p>
+                    </div>
+                    <div class="bg-neutral-50 p-8 rounded-2xl border border-neutral-100">
+                        <h3 class="text-3xl font-medium text-neutral-900 mb-2">Teuer</h3>
+                        <p class="text-[15px] leading-relaxed text-neutral-500">Der Steuerberater berechnet jede Minute, die er mit unsortierten Unterlagen verbringt.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Grid -->
+            <section id="features" class="animate-fade-up w-full" style="animation-delay: 0.3s">
+                <div class="grid lg:grid-cols-12 lg:gap-12 gap-8">
+                    <!-- Text Column -->
+                    <div class="lg:col-span-4 space-y-6">
+                        <h2 class="lg:text-4xl text-3xl font-medium text-neutral-900 tracking-tight">Deine Buchhaltung. <br>Einfach erledigt.</h2>
+                        <p class="text-[17px] leading-relaxed font-normal text-neutral-500">
+                            Wir reduzieren die Komplexität auf das Nötigste. Keine komplizierten Dashboards, sondern ein intelligenter Assistent, der dir den Rücken freihält.
+                        </p>
+                    </div>
+
+                    <!-- Cards Column -->
+                    <div class="lg:col-span-8">
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <!-- Card 1 -->
+                            <div class="bg-white p-8 rounded-2xl border border-neutral-200/60 flex flex-col gap-5 hover:border-neutral-300 transition-colors shadow-sm">
+                                <div class="w-12 h-12 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-900">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-neutral-900 mb-2">Zentraler Posteingang</h3>
+                                    <p class="text-[15px] leading-relaxed text-neutral-500">
+                                        Leite Rechnungen einfach per E-Mail weiter oder lade Fotos hoch. Alles landet an einem sicheren Ort.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Card 2 -->
+                            <div class="bg-white p-8 rounded-2xl border border-neutral-200/60 flex flex-col gap-5 hover:border-neutral-300 transition-colors shadow-sm">
+                                <div class="w-12 h-12 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-900">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 16v.01"/><path d="M12 12v.01"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-neutral-900 mb-2">KI-Kategorisierung</h3>
+                                    <p class="text-[15px] leading-relaxed text-neutral-500">
+                                        Unsere KI erkennt Lieferant, Datum und Betrag und ordnet die Ausgabe automatisch der richtigen Steuer-Kategorie zu.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Card 3 -->
+                            <div class="bg-white p-8 rounded-2xl border border-neutral-200/60 flex flex-col gap-5 hover:border-neutral-300 transition-colors shadow-sm">
+                                <div class="w-12 h-12 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-900">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-neutral-900 mb-2">GoBD Konform</h3>
+                                    <p class="text-[15px] leading-relaxed text-neutral-500">
+                                        Alle Belege werden revisionssicher archiviert. Damit bist du für jede Betriebsprüfung gewappnet.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Card 4 -->
+                            <div class="bg-white p-8 rounded-2xl border border-neutral-200/60 flex flex-col gap-5 hover:border-neutral-300 transition-colors shadow-sm">
+                                <div class="w-12 h-12 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-900">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-neutral-900 mb-2">Steuerberater Export</h3>
+                                    <p class="text-[15px] leading-relaxed text-neutral-500">
+                                        Am Jahresende (oder monatlich) exportierst du alles fix und fertig für DATEV oder deinen Steuerberater.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How It Works (Vertical Steps) -->
+            <section id="how-it-works" class="animate-scaleIn bg-white w-full z-10 border border-neutral-200 rounded-3xl p-6 relative shadow-lg">
+                <div class="flex flex-col gap-4 items-start pt-6 px-6 mb-8">
+                    <h2 class="text-4xl lg:text-5xl text-neutral-900 tracking-tighter">In 3 Schritten fertig.</h2>
+                    <p class="text-neutral-500 tracking-tight">So einfach kann Buchhaltung sein.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Step 1 -->
+                    <div class="p-6 flex flex-col bg-neutral-50 border border-neutral-100 rounded-2xl relative">
+                        <span class="inline-flex w-fit items-center px-3 py-1 rounded-full border border-neutral-200 bg-white text-xs font-bold text-neutral-800 mb-4">SCHRITT 1</span>
+                        <div class="h-32 rounded-xl bg-white border border-neutral-200 flex items-center justify-center mb-6">
+                            <iconify-icon icon="solar:camera-minimalistic-bold-duotone" width="48" class="text-neutral-300"></iconify-icon>
+                        </div>
+                        <h3 class="text-2xl text-neutral-900 tracking-tighter mb-2">Beleg erfassen</h3>
+                        <p class="text-sm text-neutral-500 leading-relaxed">Mach ein Foto mit dem Handy, lade das PDF hoch oder leite die Rechnungs-E-Mail direkt an uns weiter.</p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="p-6 flex flex-col bg-neutral-50 border border-neutral-100 rounded-2xl relative">
+                        <span class="inline-flex w-fit items-center px-3 py-1 rounded-full border border-neutral-200 bg-white text-xs font-bold text-neutral-800 mb-4">SCHRITT 2</span>
+                        <div class="h-32 rounded-xl bg-white border border-neutral-200 flex items-center justify-center mb-6">
+                            <iconify-icon icon="solar:magic-stick-3-bold-duotone" width="48" class="text-neutral-300"></iconify-icon>
+                        </div>
+                        <h3 class="text-2xl text-neutral-900 tracking-tighter mb-2">Automatische Sortierung</h3>
+                        <p class="text-sm text-neutral-500 leading-relaxed">Unsere KI liest die Daten aus, erkennt die Art der Ausgabe und legt sie im richtigen Ordner ab.</p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="p-6 flex flex-col bg-neutral-50 border border-neutral-100 rounded-2xl relative">
+                        <span class="inline-flex w-fit items-center px-3 py-1 rounded-full border border-neutral-200 bg-white text-xs font-bold text-neutral-800 mb-4">SCHRITT 3</span>
+                        <div class="h-32 rounded-xl bg-white border border-neutral-200 flex items-center justify-center mb-6">
+                            <iconify-icon icon="solar:file-check-bold-duotone" width="48" class="text-neutral-300"></iconify-icon>
+                        </div>
+                        <h3 class="text-2xl text-neutral-900 tracking-tighter mb-2">Entspannter Abschluss</h3>
+                        <p class="text-sm text-neutral-500 leading-relaxed">Ein Klick generiert den ZIP-Export mit Excel-Tabelle für deinen Steuerberater. Fertig.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Waitlist CTA Final -->
+            <section id="waitlist" class="animate-fade-up w-full my-12">
+                <div class="bg-neutral-900 rounded-[2rem] p-12 text-center relative overflow-hidden">
+                    <!-- Abstract bg decoration -->
+                    <div class="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none" style="background: radial-gradient(circle at top right, #555, transparent 50%);"></div>
+                    
+                    <div class="relative z-10 max-w-2xl mx-auto space-y-8">
+                        <h2 class="text-4xl md:text-5xl font-medium text-white tracking-tight">Bereit für stressfreie Steuern?</h2>
+                        <p class="text-neutral-400 text-lg">Sichere dir einen Platz auf der Warteliste und erhalte als Beta-Nutzer lebenslang 20% Rabatt.</p>
+                        
+                        <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                            <input type="email" placeholder="E-Mail Adresse" required class="flex-1 px-4 py-3 rounded-xl border border-neutral-700 bg-neutral-800 text-white focus:outline-none focus:ring-2 focus:ring-white transition-all">
+                            <button type="submit" class="bg-white text-neutral-900 hover:bg-neutral-200 px-6 py-3 rounded-xl font-medium transition-colors">
+                                Kostenlos vormerken
+                            </button>
+                        </form>
+                        <p class="text-xs text-neutral-600">Startet Q3 2025. Nur für Gewerbetreibende & Freelancer.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="pb-10 pt-10 border-t border-neutral-200">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="text-neutral-900 font-semibold text-lg">TaxFlow</div>
+                    <div class="text-sm text-neutral-500">
+                        &copy; 2025 TaxFlow SaaS. Made in Germany.
+                    </div>
+                    <div class="flex gap-6 text-sm text-neutral-500">
+                        <a href="#" class="hover:text-neutral-900">Impressum</a>
+                        <a href="#" class="hover:text-neutral-900">Datenschutz</a>
+                    </div>
+                </div>
+            </footer>
+
+        </main>
+    </div>
+
+</body>
+</html>
