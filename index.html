@@ -17,7 +17,7 @@
 
 <style>
 :root {
-/* Keine Cursor Größe mehr nötig */
+--cursor-size: 12px;
 }
 body {
 font-family: 'Manrope', sans-serif;
@@ -25,29 +25,123 @@ background-color: #030303;
 color: #ffffff;
 overflow-x: hidden;
 margin: 0;
-cursor: default; /* Nativer Cursor ist zurück */
+cursor: none; /* System Cursor verstecken */
 }
 
-/* --- SPOTLIGHT GLOW EFFECT --- */
-#cursor-glow {
-position: fixed;
-top: 0; left: 0;
-width: 500px; height: 500px; /* Größe des Lichtkegels */
-/* Goldener Glow, der nach außen transparent wird */
-background: radial-gradient(circle closest-side, rgba(250, 204, 21, 0.12), transparent);
-transform: translate(-50%, -50%);
-pointer-events: none; /* Klicks gehen durch */
-z-index: 9999; /* Über allem, aber durchlässig */
-mix-blend-mode: screen; /* Licht-Effekt */
-opacity: 0; /* Erst sichtbar bei Mausbewegung */
-transition: opacity 0.5s ease;
-will-change: left, top;
-}
-
-/* Fallback für Touch Devices: Kein Glow */
+/* Fallback für Touch Devices */
 @media (hover: none) {
-    #cursor-glow { display: none !important; }
+    body { cursor: auto; }
+    #context-cursor, #cursor-glow { display: none !important; }
 }
+
+/* --- 1. SPOTLIGHT GLOW (Hintergrund) --- */
+#cursor-glow {
+    position: fixed;
+    top: 0; left: 0;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle closest-side, rgba(250, 204, 21, 0.1), transparent);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9998; /* Unter dem Shifter, aber über Content */
+    mix-blend-mode: screen;
+    will-change: left, top;
+    transition: opacity 0.3s ease;
+}
+
+/* --- 2. CONTEXT SHIFTER (Vordergrund) --- */
+#context-cursor {
+    position: fixed;
+    top: 0; left: 0;
+    width: var(--cursor-size); height: var(--cursor-size);
+    background-color: white;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10000; /* Ganz oben */
+    transform: translate(-50%, -50%);
+    mix-blend-mode: exclusion; /* Kontrast */
+    transition: 
+        width 0.3s cubic-bezier(0.19, 1, 0.22, 1),
+        height 0.3s cubic-bezier(0.19, 1, 0.22, 1),
+        background-color 0.3s ease,
+        border-radius 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: left, top, width, height;
+}
+
+/* Text im Cursor */
+#context-cursor::after {
+    content: '';
+    opacity: 0;
+    color: black;
+    font-family: 'Manrope', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: opacity 0.2s ease;
+}
+
+/* --- STATES (DEUTSCHE BEGRIFFE) --- */
+
+/* 1. Interaktiv (Links/Buttons) -> "KLICK" */
+body.cursor-hover #context-cursor {
+    width: 60px; height: 60px;
+    background-color: white;
+    mix-blend-mode: normal; 
+}
+body.cursor-hover #context-cursor::after {
+    content: 'KLICK';
+    opacity: 1;
+}
+
+/* 2. Text -> I-Beam */
+body.cursor-text #context-cursor {
+    width: 2px; height: 24px;
+    border-radius: 2px;
+    background-color: #FACC15;
+}
+
+/* 3. Scan Karte -> "SCAN" */
+body.cursor-scan #context-cursor {
+    width: 80px; height: 80px;
+    background-color: rgba(250, 204, 21, 0.9); /* Gelb */
+    mix-blend-mode: normal;
+    border-radius: 20px; 
+}
+body.cursor-scan #context-cursor::after {
+    content: 'SCAN';
+    color: black;
+    opacity: 1;
+}
+
+/* 4. AI Karte -> "ANALYSE" */
+body.cursor-ai #context-cursor {
+    width: 80px; height: 80px;
+    background-color: rgba(59, 130, 246, 0.9); /* Blau */
+    mix-blend-mode: normal;
+    border-radius: 50%;
+}
+body.cursor-ai #context-cursor::after {
+    content: 'ANALYSE';
+    color: white;
+    opacity: 1;
+}
+
+/* 5. Save Karte -> "SICHERN" */
+body.cursor-save #context-cursor {
+    width: 80px; height: 80px;
+    background-color: rgba(34, 197, 94, 0.9); /* Grün */
+    mix-blend-mode: normal;
+    border-radius: 10px;
+}
+body.cursor-save #context-cursor::after {
+    content: 'SICHERN';
+    color: white;
+    opacity: 1;
+}
+
 
 /* --- TYPOGRAPHY --- */
 .font-display { font-family: 'Space Grotesk', sans-serif; }
@@ -90,7 +184,7 @@ will-change: transform;
 background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
 }
 
-/* --- ANIMATIONS FOR CARDS --- */
+/* --- ANIMATIONS --- */
 @keyframes scan-line {
 0% { top: 0%; opacity: 0; }
 10% { opacity: 1; }
@@ -105,8 +199,6 @@ background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='ht
 .animate-type {
 animation: code-type 2s steps(20, end) infinite alternate;
 }
-
-/* Checkmark Animations */
 @keyframes draw-check {
   0% { stroke-dasharray: 50; stroke-dashoffset: 50; opacity: 0; }
   20% { opacity: 1; }
@@ -154,29 +246,32 @@ plugins: []
         </div>
     </div>
 
-    <!-- CUSTOM GLOW SPOTLIGHT (Kein Kreis mehr, sondern Licht) -->
+    <!-- 1. GLOW (Unten) -->
     <div id="cursor-glow"></div>
+    <!-- 2. SHIFTER (Oben) -->
+    <div id="context-cursor"></div>
 
     <!-- NAVIGATION -->
     <nav class="fixed transition-transform duration-300 z-50 pt-4 px-4 md:pt-6 md:px-6 top-0 right-0 left-0" id="navbar">
         <div class="flex flex-col glass max-w-[1600px] rounded-[24px] md:rounded-full mr-auto ml-auto px-4 py-3 md:px-8 items-center justify-between transition-all duration-300">
             <div class="flex w-full items-center justify-between">
-                <a href="#" class="flex items-center gap-3 group hover-trigger">
+                <!-- LOGO FIX: Added pointer-events-none to text so hover works on parent 'a' -->
+                <a href="#" class="flex items-center gap-3 group hover-trigger" data-cursor="hover">
                     <div class="flex overflow-hidden bg-center text-black bg-white w-7 h-7 md:w-8 md:h-8 items-center justify-center rounded-sm font-bold font-display">
                         B
                     </div>
-                    <span class="text-base md:text-lg font-semibold text-white tracking-tight font-display text-left">BELEG.<span class="font-light text-yellow-500">BUTLER</span></span>
+                    <span class="pointer-events-none text-base md:text-lg font-semibold text-white tracking-tight font-display text-left">BELEG.<span class="font-light text-yellow-500">BUTLER</span></span>
                 </a>
                 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center gap-12">
-                    <a href="#how-it-works" class="text-xs font-medium uppercase tracking-widest transition-colors hover-trigger hover:text-white text-yellow-400">So geht's</a>
-                    <a href="#features" class="uppercase transition-colors hover-trigger hover:text-white text-xs font-medium text-yellow-400 tracking-widest">Features</a>
+                    <a href="#how-it-works" class="text-xs font-medium uppercase tracking-widest transition-colors hover:text-white text-yellow-400" data-cursor="hover">So geht's</a>
+                    <a href="#features" class="uppercase transition-colors hover:text-white text-xs font-medium text-yellow-400 tracking-widest" data-cursor="hover">Features</a>
                 </div>
 
                 <!-- Right Actions -->
                 <div class="flex items-center gap-4">
-                    <a href="#waitlist" class="uppercase transition-colors hover-trigger hover:bg-yellow-200 cursor-pointer text-xs font-semibold text-black tracking-wider bg-amber-400 rounded-full px-6 py-2">WARTELISTE</a>
+                    <a href="#waitlist" class="uppercase transition-colors cursor-pointer text-xs font-semibold text-black tracking-wider bg-amber-400 rounded-full px-6 py-2 hover:bg-amber-300" data-cursor="hover">WARTELISTE</a>
                 </div>
             </div>
 
@@ -198,13 +293,13 @@ plugins: []
         <div class="z-10 text-center max-w-[1400px] mr-auto ml-auto relative gap-x-12 gap-y-16 flex flex-col items-center">
             
             <!-- Badge -->
-            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full border backdrop-blur-md mb-8 md:mb-12 hover-trigger opacity-0 animate-fade-in border-white/10 bg-white/5" style="opacity: 1;">
+            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full border backdrop-blur-md mb-8 md:mb-12 opacity-0 animate-fade-in border-white/10 bg-white/5" style="opacity: 1;">
                 <span class="w-1.5 h-1.5 rounded-full animate-pulse bg-white"></span>
                 <span class="text-[10px] uppercase font-medium tracking-[0.2em] text-yellow-300">Warteliste geöffnet</span>
             </div>
 
             <!-- Headline -->
-            <h1 class="font-display text-5xl sm:text-6xl md:text-8xl lg:text-[6.5rem] font-medium tracking-tighter leading-[0.95] mb-8 md:mb-12 mix-blend-difference text-white">
+            <h1 class="font-display text-5xl sm:text-6xl md:text-8xl lg:text-[6.5rem] font-medium tracking-tighter leading-[0.95] mb-8 md:mb-12 mix-blend-difference text-white" data-cursor="text">
                 <span class="mask-text"><span>EINGANGS</span></span>
                 <span class="mask-text"><span class="text-yellow-500">RECHNUNGEN</span></span>
                 <span class="mask-text"><span>AUTOMATISIERT</span></span>
@@ -212,7 +307,7 @@ plugins: []
 
             <!-- Subline + Stats -->
             <div class="flex flex-col md:flex-row items-center justify-between w-full max-w-4xl mx-auto mt-8 md:mt-12 border-t pt-8 opacity-0 animate-fade-up border-white/10">
-                <p class="text-sm text-yellow-400 text-center md:text-left max-w-sm mb-8 md:mb-0">
+                <p class="text-sm text-yellow-400 text-center md:text-left max-w-sm mb-8 md:mb-0" data-cursor="text">
                     Verbinde dein E-Mail-Konto. Beleg.Butler erkennt eingehende Rechnungen, kategorisiert sie vollautomatisch und legt sie zentral für dich im Dashboard ab.
                 </p>
                 <div class="flex gap-12">
@@ -234,8 +329,8 @@ plugins: []
                     <div class="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
                     
                     <div class="relative flex items-center bg-black rounded-xl p-1 border border-white/10">
-                        <input type="email" placeholder="deine@email.de" class="w-full bg-transparent text-white px-4 py-3 outline-none placeholder:text-white/30 font-medium" required>
-                        <button type="submit" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold uppercase tracking-wider text-xs py-3 px-6 rounded-lg transition-all transform hover:scale-[1.02] cursor-pointer">
+                        <input type="email" placeholder="deine@email.de" class="w-full bg-transparent text-white px-4 py-3 outline-none placeholder:text-white/30 font-medium" required data-cursor="text">
+                        <button type="submit" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold uppercase tracking-wider text-xs py-3 px-6 rounded-lg transition-all transform hover:scale-[1.02] cursor-pointer" data-cursor="hover">
                             Beitreten
                         </button>
                     </div>
@@ -252,7 +347,7 @@ plugins: []
             <div class="flex flex-col md:flex-row md:items-end md:mb-16 gap-6 md:gap-8 mb-16 items-start justify-between">
                 <div class="gap-x-4 gap-y-4">
                     <h2 class="text-3xl md:text-4xl lg:text-6xl font-display font-medium mb-4 md:mb-6 text-white">Live Verarbeitung</h2>
-                    <p class="text-base md:text-lg text-yellow-400 max-w-lg">
+                    <p class="text-base md:text-lg text-yellow-400 max-w-lg" data-cursor="text">
                         Dein persönlicher Rechnungs-Assistent, der niemals schläft. Eingehende E-Mails werden analysiert, Rechnungen extrahiert und zentral gespeichert.
                     </p>
                 </div>
@@ -266,7 +361,7 @@ plugins: []
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
     
                 <!-- Card 1: Scanning -->
-                <div class="group hover-trigger relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)] hover:border-yellow-500/50 transition-all duration-500 hover:-translate-y-2">
+                <div class="group hover-trigger relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)] hover:border-yellow-500/50 transition-all duration-500 hover:-translate-y-2" data-cursor="scan">
                     <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center overflow-hidden">
                         <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80')] bg-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700"></div>
                         <div class="w-full h-1 bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,1)] absolute top-0 animate-[scan-line_3s_linear_infinite]"></div>
@@ -292,7 +387,7 @@ plugins: []
                 </div>
 
                 <!-- Card 2: AI Processing -->
-                <div class="group hover-trigger relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:border-blue-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 100ms;">
+                <div class="group hover-trigger relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:border-blue-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 100ms;" data-cursor="ai">
                     <div class="absolute inset-0 w-full h-full bg-gray-900 font-mono text-[10px] text-blue-400 p-4 opacity-60 overflow-hidden">
                         <div class="animate-type whitespace-pre-wrap">
 > Analyzing Invoice #2024-89
@@ -325,8 +420,8 @@ plugins: []
                     </div>
                 </div>
 
-                <!-- Card 3: Export (UPDATED: ALL GREEN) -->
-                <div class="group hover-trigger relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(34,197,94,0.3)] hover:border-green-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 200ms;">
+                <!-- Card 3: Export -->
+                <div class="group hover-trigger relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(34,197,94,0.3)] hover:border-green-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 200ms;" data-cursor="save">
                     <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center">
                         <!-- Animated Container -->
                         <div class="w-20 h-20 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500 shadow-[0_0_30px_rgba(34,197,94,0.4)] animate-success">
@@ -366,7 +461,7 @@ plugins: []
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-24">
                 <div class="lg:sticky md:top-32 lg:mb-0 h-fit mb-12 relative top-0">
                     <h2 class="md:text-5xl lg:text-6xl md:mb-8 text-4xl font-medium text-white tracking-tight font-display mb-6">Dein <br>Butler</h2>
-                    <p class="text-base md:text-lg text-yellow-400 text-justify max-w-md mb-8 md:mb-12">
+                    <p class="text-base md:text-lg text-yellow-400 text-justify max-w-md mb-8 md:mb-12" data-cursor="text">
                         Beleg.Butler ersetzt Schuhkartons und manuelle Excel-Listen durch eine intelligente Pipeline, die deine Eingangsrechnungen vollautomatisch verwaltet.
                     </p>
                     <ul class="space-y-3 md:space-y-4 text-sm md:text-base">
@@ -379,7 +474,7 @@ plugins: []
                 <div class="flex flex-col gap-8 md:gap-12 pb-16">
                     
                     <!-- Card 1: CONNECT -->
-                    <div class="card-3d-wrap group h-auto min-h-[400px] md:h-[450px] w-full cursor-pointer hover-trigger">
+                    <div class="card-3d-wrap group h-auto min-h-[400px] md:h-[450px] w-full cursor-pointer hover-trigger" data-cursor="scan">
                         <div class="card-3d-inner relative w-full h-full border rounded-2xl p-4 md:p-10 flex flex-col justify-between shadow-2xl overflow-hidden bg-noise default border-white/10">
                             
                             <!-- Visual: Data Flow -->
@@ -424,7 +519,7 @@ plugins: []
                     </div>
 
                     <!-- Card 2: AI ENGINE -->
-                    <div class="card-3d-wrap group cursor-pointer hover-trigger w-full h-auto min-h-[400px] md:h-[450px]">
+                    <div class="card-3d-wrap group cursor-pointer hover-trigger w-full h-auto min-h-[400px] md:h-[450px]" data-cursor="ai">
                         <div class="card-3d-inner relative w-full h-full border rounded-2xl p-4 md:p-10 flex flex-col justify-between shadow-2xl overflow-hidden bg-noise default border-white/10">
                             
                             <!-- Visual: Terminal -->
@@ -464,7 +559,7 @@ plugins: []
                     </div>
 
                     <!-- Card 3: CENTRAL HUB -->
-                    <div class="card-3d-wrap group cursor-pointer hover-trigger w-full h-auto min-h-[400px] md:h-[450px]">
+                    <div class="card-3d-wrap group cursor-pointer hover-trigger w-full h-auto min-h-[400px] md:h-[450px]" data-cursor="save">
                         <div class="card-3d-inner flex flex-col overflow-hidden default w-full h-full border-white/10 border rounded-2xl p-4 md:p-10 relative shadow-2xl justify-between">
                             
                             <!-- Visual: Hub -->
@@ -505,11 +600,11 @@ plugins: []
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-16 md:mb-20">
                 <!-- Brand -->
                 <div class="lg:col-span-1 space-y-6">
-                    <a href="#" class="flex items-center gap-3">
+                    <a href="#" class="flex items-center gap-3" data-cursor="hover">
                          <div class="flex overflow-hidden bg-center text-black bg-white w-8 h-8 items-center justify-center rounded-sm font-bold font-display">B</div>
                         <span class="text-lg font-bold text-white tracking-tight font-display">BELEG.<span class="font-light text-yellow-500">BUTLER</span></span>
                     </a>
-                    <p class="text-sm leading-relaxed max-w-xs text-yellow-400">
+                    <p class="text-sm leading-relaxed max-w-xs text-yellow-400" data-cursor="text">
                         Die Zukunft der vorbereitenden Buchhaltung für Kleinunternehmer.
                     </p>
                 </div>
@@ -521,8 +616,8 @@ plugins: []
                 <div class="lg:col-span-1">
                     <h4 class="text-xs font-bold uppercase tracking-widest mb-6 text-white">Noch nicht eingetragen?</h4>
                     <form class="relative" onsubmit="event.preventDefault(); alert('Danke! Du stehst auf der Liste.');">
-                        <input type="email" placeholder="Deine E-Mail Adresse" required class="focus:outline-none focus:border-yellow-500 transition-colors text-sm text-white bg-white/5 w-full border-white/10 border rounded-lg pt-3 pr-12 pb-3 pl-4">
-                        <button type="submit" class="absolute right-2 top-2 p-1 rounded transition-colors bg-white text-black hover:bg-yellow-400 cursor-pointer">
+                        <input type="email" placeholder="Deine E-Mail Adresse" required class="focus:outline-none focus:border-yellow-500 transition-colors text-sm text-white bg-white/5 w-full border-white/10 border rounded-lg pt-3 pr-12 pb-3 pl-4" data-cursor="text">
+                        <button type="submit" class="absolute right-2 top-2 p-1 rounded transition-colors bg-white text-black hover:bg-yellow-400 cursor-pointer" data-cursor="hover">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[16px] h-[16px]"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </button>
                     </form>
@@ -534,8 +629,8 @@ plugins: []
             <div class="pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4 border-white/10">
                 <div class="text-[10px] uppercase text-yellow-600 tracking-widest text-center md:text-left">© 2025 Beleg.Butler. Made in Germany.</div>
                 <div class="flex gap-6 text-[10px] uppercase tracking-widest text-yellow-600">
-                    <a href="#" class="transition-colors hover:text-yellow-400">Impressum</a>
-                    <a href="#" class="transition-colors hover:text-yellow-400">Datenschutz</a>
+                    <a href="#" class="transition-colors hover:text-yellow-400" data-cursor="hover">Impressum</a>
+                    <a href="#" class="transition-colors hover:text-yellow-400" data-cursor="hover">Datenschutz</a>
                 </div>
             </div>
         </div>
@@ -564,23 +659,43 @@ plugins: []
         // Connect GSAP to Lenis
         gsap.registerPlugin(ScrollTrigger);
         
-        // 2. SPOTLIGHT GLOW CURSOR LOGIC
+        // 2. CONTEXT SHIFTER + GLOW CURSOR LOGIC
         if (window.matchMedia("(pointer: fine)").matches) {
+            const cursor = document.getElementById('context-cursor');
             const glow = document.getElementById('cursor-glow');
+            const body = document.body;
             
-            // Mouse move handler
             document.addEventListener('mousemove', (e) => {
-                // Glow sichtbar machen und positionieren
+                // Beide Cursors positionieren (0 Latenz)
+                const x = e.clientX + 'px';
+                const y = e.clientY + 'px';
+                
+                cursor.style.left = x;
+                cursor.style.top = y;
+                
+                glow.style.left = x;
+                glow.style.top = y;
                 glow.style.opacity = '1';
-                // WICHTIG: Direkte Positionierung für 0 Latenz
-                glow.style.left = e.clientX + 'px';
-                glow.style.top = e.clientY + 'px';
             });
 
-            // Optional: Glow ausblenden wenn Maus das Fenster verlässt
             document.addEventListener('mouseleave', () => {
                 glow.style.opacity = '0';
             });
+
+            // Generic Hover Handler
+            const handleHover = (selector, stateClass) => {
+                document.querySelectorAll(selector).forEach(el => {
+                    el.addEventListener('mouseenter', () => body.classList.add(stateClass));
+                    el.addEventListener('mouseleave', () => body.classList.remove(stateClass));
+                });
+            };
+
+            // Setup Contexts
+            handleHover('a, button, .hover-trigger, [data-cursor="hover"]', 'cursor-hover');
+            handleHover('p, h1, h2, h3, span, input, [data-cursor="text"]', 'cursor-text');
+            handleHover('[data-cursor="scan"]', 'cursor-scan');
+            handleHover('[data-cursor="ai"]', 'cursor-ai');
+            handleHover('[data-cursor="save"]', 'cursor-save');
         }
 
         // 4. Hero Text Mask Animation
