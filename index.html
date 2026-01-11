@@ -29,7 +29,8 @@ margin: 0;
 @media (hover: hover) and (pointer: fine) {
 body { cursor: none; }
 }
-/* --- CUSTOM CURSOR --- */
+
+/* --- OPTIMIZED CURSOR --- */
 #cursor {
 position: fixed;
 top: 0; left: 0;
@@ -39,9 +40,10 @@ border-radius: 50%;
 pointer-events: none;
 z-index: 9999;
 transform: translate(-50%, -50%);
-transition: width 0.3s, height 0.3s, background-color 0.3s;
+transition: width 0.2s, height 0.2s, background-color 0.2s; /* Faster transition */
 mix-blend-mode: difference;
 display: none; 
+will-change: transform, width, height; /* Performance Optimization */
 }
 @media (hover: hover) and (pointer: fine) {
 #cursor { display: block; }
@@ -52,12 +54,16 @@ background-color: white;
 border-color: transparent;
 mix-blend-mode: exclusion;
 }
+
 /* --- TYPOGRAPHY --- */
 .font-display { font-family: 'Space Grotesk', sans-serif; }
+
 /* --- UTILITIES --- */
+/* Reduced blur radius for better performance */
 .glass {
 background: rgba(255, 255, 255, 0.03);
-backdrop-filter: blur(10px);
+backdrop-filter: blur(8px); 
+-webkit-backdrop-filter: blur(8px);
 border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .grayscale-img {
@@ -68,13 +74,16 @@ transition: filter 0.5s ease, transform 0.7s ease;
 filter: grayscale(0%);
 transform: scale(1.05);
 }
+
 /* --- 3D ANIMATIONS --- */
 .card-3d-wrap { perspective: 1000px; }
 .card-3d-inner {
 transform-style: preserve-3d;
-transition: transform 0.5s;
+transition: transform 0.1s linear; /* Changed for smoother RAF animation */
+will-change: transform; /* Performance Optimization */
 }
 .card-element { transform: translateZ(40px); }
+
 /* --- MASK REVEAL --- */
 .mask-text { overflow: hidden; display: block; }
 .mask-text span {
@@ -82,10 +91,12 @@ display: block;
 transform: translateY(110%);
 will-change: transform;
 }
+
 /* --- NOISE TEXTURE --- */
 .bg-noise {
 background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
 }
+
 /* --- ANIMATIONS FOR CARDS --- */
 @keyframes scan-line {
 0% { top: 0%; opacity: 0; }
@@ -115,7 +126,7 @@ animation: code-type 2s steps(20, end) infinite alternate;
 }
 .animate-draw {
     animation: draw-check 2s cubic-bezier(0.65, 0, 0.45, 1) infinite;
-    animation-delay: 1s; /* Slight pause before loop repeats (though infinite resets, dashoffset helps visual) */
+    animation-delay: 1s; 
 }
 .animate-success {
     animation: success-pulse 2s ease-in-out infinite;
@@ -141,7 +152,8 @@ plugins: []
 <body class="antialiased overflow-x-hidden text-white bg-black relative">
     
     <!-- Unicorn Studio Hintergrund (Die Welle) -->
-    <div class="aura-background-component inset-0 pointer-events-none z-0 fixed saturate-200 hue-rotate-180" data-alpha-mask="80" style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent);">
+    <!-- will-change added for performance -->
+    <div class="aura-background-component inset-0 pointer-events-none z-0 fixed saturate-200 hue-rotate-180" data-alpha-mask="80" style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); will-change: transform;">
         <div class="aura-background-component top-0 w-full -z-10 absolute h-full">
             <div data-us-project="FixNvEwvWwbu3QX9qC3F" class="absolute w-full h-full left-0 top-0 -z-10"></div>
             <script type="text/javascript">
@@ -227,11 +239,11 @@ plugins: []
             <div class="w-full max-w-md mt-16 animate-fade-up opacity-0" style="animation-delay: 0.6s;">
                 <form class="relative group" onsubmit="event.preventDefault(); alert('Danke! Du bist auf der Liste.');">
                     <!-- Glow Effect -->
-                    <div class="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200 will-change-transform"></div>
                     
                     <div class="relative flex items-center bg-black rounded-xl p-1 border border-white/10">
                         <input type="email" placeholder="deine@email.de" class="w-full bg-transparent text-white px-4 py-3 outline-none placeholder:text-white/30 font-medium" required>
-                        <button type="submit" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold uppercase tracking-wider text-xs py-3 px-6 rounded-lg transition-all transform hover:scale-[1.02]">
+                        <button type="submit" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold uppercase tracking-wider text-xs py-3 px-6 rounded-lg transition-all transform hover:scale-[1.02] cursor-pointer">
                             Beitreten
                         </button>
                     </div>
@@ -260,8 +272,8 @@ plugins: []
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
     
-                <!-- Card 1: Scanning -->
-                <div class="group relative aspect-[4/5] md:aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)] hover:border-yellow-500/50 transition-all duration-500 hover:-translate-y-2">
+                <!-- Card 1: Scanning (CHANGED ASPECT RATIO: aspect-square) -->
+                <div class="group relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)] hover:border-yellow-500/50 transition-all duration-500 hover:-translate-y-2">
                     <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center overflow-hidden">
                         <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80')] bg-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700"></div>
                         <div class="w-full h-1 bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,1)] absolute top-0 animate-[scan-line_3s_linear_infinite]"></div>
@@ -286,8 +298,8 @@ plugins: []
                     </div>
                 </div>
 
-                <!-- Card 2: AI Processing -->
-                <div class="group relative aspect-[4/5] md:aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:border-blue-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 100ms;">
+                <!-- Card 2: AI Processing (CHANGED ASPECT RATIO: aspect-square) -->
+                <div class="group relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:border-blue-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 100ms;">
                     <div class="absolute inset-0 w-full h-full bg-gray-900 font-mono text-[10px] text-blue-400 p-4 opacity-60 overflow-hidden">
                         <div class="animate-type whitespace-pre-wrap">
 > Analyzing Invoice #2024-89
@@ -320,8 +332,8 @@ plugins: []
                     </div>
                 </div>
 
-                <!-- Card 3: Export (ANIMATED CHECKMARK) -->
-                <div class="group relative aspect-[4/5] md:aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(168,85,247,0.3)] hover:border-purple-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 200ms;">
+                <!-- Card 3: Export (CHANGED ASPECT RATIO: aspect-square) + ANIMATED CHECKMARK -->
+                <div class="group relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(168,85,247,0.3)] hover:border-purple-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 200ms;">
                     <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center">
                         <!-- Animated Container -->
                         <div class="w-20 h-20 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500 shadow-[0_0_30px_rgba(34,197,94,0.4)] animate-success">
@@ -516,7 +528,7 @@ plugins: []
                     <h4 class="text-xs font-bold uppercase tracking-widest mb-6 text-white">Noch nicht eingetragen?</h4>
                     <form class="relative" onsubmit="event.preventDefault(); alert('Danke! Du stehst auf der Liste.');">
                         <input type="email" placeholder="Deine E-Mail Adresse" required class="focus:outline-none focus:border-yellow-500 transition-colors text-sm text-white bg-white/5 w-full border-white/10 border rounded-lg pt-3 pr-12 pb-3 pl-4">
-                        <button type="submit" class="absolute right-2 top-2 p-1 rounded transition-colors bg-white text-black hover:bg-yellow-400">
+                        <button type="submit" class="absolute right-2 top-2 p-1 rounded transition-colors bg-white text-black hover:bg-yellow-400 cursor-pointer">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[16px] h-[16px]"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </button>
                     </form>
@@ -537,14 +549,14 @@ plugins: []
 
     <!-- SCRIPTS -->
     <script>
-        // 1. LIGHTER SMOOTH SCROLL CONFIG
+        // 1. LIGHTER SMOOTH SCROLL CONFIG (Performance Optimized)
         const lenis = new Lenis({
-            duration: 0.8,
+            duration: 1.2,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
             direction: 'vertical',
             gestureDirection: 'vertical',
             smooth: true,
-            mouseMultiplier: 0.8,
+            mouseMultiplier: 1, // Normalized mouse multiplier
             smoothTouch: false,
             touchMultiplier: 2,
         })
@@ -563,10 +575,22 @@ plugins: []
             const cursor = document.getElementById('cursor');
             const hoverTriggers = document.querySelectorAll('.hover-trigger');
             
+            // Use requestAnimationFrame for smoother cursor updates
+            let mouseX = 0, mouseY = 0;
+            let cursorX = 0, cursorY = 0;
+
             document.addEventListener('mousemove', (e) => {
-                cursor.style.left = e.clientX + 'px';
-                cursor.style.top = e.clientY + 'px';
+                mouseX = e.clientX;
+                mouseY = e.clientY;
             });
+
+            function animateCursor() {
+                cursorX += (mouseX - cursorX) * 0.2;
+                cursorY += (mouseY - cursorY) * 0.2;
+                cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+                requestAnimationFrame(animateCursor);
+            }
+            animateCursor();
 
             hoverTriggers.forEach(el => {
                 el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
@@ -574,8 +598,6 @@ plugins: []
             });
         }
 
-        // 3. CANVAS (Entfernt da Unicorn Studio Welle genutzt wird)
-        
         // 4. Hero Text Mask Animation
         const headings = document.querySelectorAll('.mask-text span');
         headings.forEach((h, i) => {
@@ -590,25 +612,33 @@ plugins: []
         gsap.to(".animate-fade-in", { opacity: 1, duration: 1, delay: 0.5 });
         gsap.to(".animate-fade-up", { opacity: 1, y: 0, duration: 1, delay: 0.8, ease: "power2.out" });
 
-        // 5. 3D Card Tilt
+        // 5. 3D Card Tilt (Performance Optimized via RAF)
         if (window.matchMedia("(hover: hover)").matches) {
             const cards3d = document.querySelectorAll('.card-3d-wrap');
+            
             cards3d.forEach(card => {
+                let rect, centerX, centerY;
+                const inner = card.querySelector('.card-3d-inner');
+
+                card.addEventListener('mouseenter', () => {
+                    rect = card.getBoundingClientRect();
+                    centerX = rect.width / 2;
+                    centerY = rect.height / 2;
+                });
+
                 card.addEventListener('mousemove', (e) => {
-                    const rect = card.getBoundingClientRect();
+                    // Calculate directly in event but use CSS transition for smoothing
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    const rotateX = ((y - centerY) / centerY) * -10;
-                    const rotateY = ((x - centerX) / centerX) * 10;
-
-                    const inner = card.querySelector('.card-3d-inner');
-                    inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    const rotateX = ((y - centerY) / centerY) * -5; // Reduced intensity
+                    const rotateY = ((x - centerX) / centerX) * 5;  // Reduced intensity
+                    
+                    requestAnimationFrame(() => {
+                        inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    });
                 });
 
                 card.addEventListener('mouseleave', () => {
-                    const inner = card.querySelector('.card-3d-inner');
                     inner.style.transform = `rotateX(0deg) rotateY(0deg)`;
                 });
             });
