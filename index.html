@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TaxFlow | Automatisierte Steuer-Vorbereitung</title>
+<title>Beleg.Butler | Deine Eingangsrechnungen auf Autopilot</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- GSAP & ScrollTrigger -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -101,6 +101,26 @@ background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='ht
 .animate-type {
 animation: code-type 2s steps(20, end) infinite alternate;
 }
+
+/* Checkmark Animations */
+@keyframes draw-check {
+  0% { stroke-dasharray: 50; stroke-dashoffset: 50; opacity: 0; }
+  20% { opacity: 1; }
+  100% { stroke-dasharray: 50; stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes success-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(34,197,94,0); }
+  50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(34,197,94,0.3); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(34,197,94,0); }
+}
+.animate-draw {
+    animation: draw-check 2s cubic-bezier(0.65, 0, 0.45, 1) infinite;
+    animation-delay: 1s; /* Slight pause before loop repeats (though infinite resets, dashoffset helps visual) */
+}
+.animate-success {
+    animation: success-pulse 2s ease-in-out infinite;
+    animation-delay: 1s;
+}
 </style>
 <script>
 tailwind.config = {
@@ -120,11 +140,7 @@ plugins: []
 </head>
 <body class="antialiased overflow-x-hidden text-white bg-black relative">
     
-    <!-- 
-      KORREKTUR: Unicorn Studio Hintergrund (Die Welle) 
-      Original Video und Canvas entfernt. 
-      hue-rotate-180 sorgt für den orangenen/goldenen Look der Welle.
-    -->
+    <!-- Unicorn Studio Hintergrund (Die Welle) -->
     <div class="aura-background-component inset-0 pointer-events-none z-0 fixed saturate-200 hue-rotate-180" data-alpha-mask="80" style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent);">
         <div class="aura-background-component top-0 w-full -z-10 absolute h-full">
             <div data-us-project="FixNvEwvWwbu3QX9qC3F" class="absolute w-full h-full left-0 top-0 -z-10"></div>
@@ -143,16 +159,15 @@ plugins: []
             <div class="flex w-full items-center justify-between">
                 <a href="#" class="flex items-center gap-3 group hover-trigger">
                     <div class="flex overflow-hidden bg-center text-black bg-white w-7 h-7 md:w-8 md:h-8 items-center justify-center rounded-sm font-bold font-display">
-                        T
+                        B
                     </div>
-                    <span class="text-base md:text-lg font-semibold text-white tracking-tight font-display text-left">TAX<span class="font-light text-yellow-500">FLOW</span></span>
+                    <span class="text-base md:text-lg font-semibold text-white tracking-tight font-display text-left">BELEG.<span class="font-light text-yellow-500">BUTLER</span></span>
                 </a>
                 
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center gap-12">
                     <a href="#how-it-works" class="text-xs font-medium uppercase tracking-widest transition-colors hover-trigger hover:text-white text-yellow-400">So geht's</a>
                     <a href="#features" class="uppercase transition-colors hover-trigger hover:text-white text-xs font-medium text-yellow-400 tracking-widest">Features</a>
-                    <a href="#testimonials" class="uppercase transition-colors hover-trigger hover:text-white text-xs font-medium text-yellow-400 tracking-widest">Stories</a>
                 </div>
 
                 <!-- Right Actions -->
@@ -166,7 +181,6 @@ plugins: []
                 <div class="flex flex-col gap-4 items-center">
                     <a href="#how-it-works" class="text-sm font-medium uppercase tracking-widest text-yellow-400 hover:text-white w-full text-center py-3 border-b border-white/5" onclick="toggleMobileMenu()">So geht's</a>
                     <a href="#features" class="text-sm font-medium uppercase tracking-widest text-yellow-400 hover:text-white w-full text-center py-3 border-b border-white/5" onclick="toggleMobileMenu()">Features</a>
-                    <a href="#testimonials" class="text-sm font-medium uppercase tracking-widest text-yellow-400 hover:text-white w-full text-center py-3" onclick="toggleMobileMenu()">Stories</a>
                 </div>
                 <button class="w-full uppercase transition-colors hover:bg-yellow-200 cursor-pointer text-xs font-semibold text-black tracking-wider bg-amber-400 rounded-full py-4 mt-2" onclick="window.location.href='#waitlist'">ZUR WARTELISTE</button>
             </div>
@@ -175,36 +189,56 @@ plugins: []
 
     <!-- SECTION 1: HERO -->
     <section class="min-h-[100dvh] flex flex-col overflow-hidden z-10 md:px-6 pr-4 pl-4 relative items-center justify-center">
-        <!-- Canvas entfernt, da durch Unicorn Studio ersetzt -->
         <div class="z-0 pointer-events-none bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 absolute top-0 right-0 bottom-0 left-0"></div>
 
-        <div class="z-10 text-center max-w-[1400px] mr-auto ml-auto relative gap-x-12 gap-y-16">
+        <div class="z-10 text-center max-w-[1400px] mr-auto ml-auto relative gap-x-12 gap-y-16 flex flex-col items-center">
+            
+            <!-- Badge -->
             <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full border backdrop-blur-md mb-8 md:mb-12 hover-trigger opacity-0 animate-fade-in border-white/10 bg-white/5" style="opacity: 1;">
                 <span class="w-1.5 h-1.5 rounded-full animate-pulse bg-white"></span>
                 <span class="text-[10px] uppercase font-medium tracking-[0.2em] text-yellow-300">Warteliste geöffnet</span>
             </div>
 
-            <h1 class="font-display text-5xl sm:text-6xl md:text-8xl lg:text-[7rem] font-medium tracking-tighter leading-[0.95] mb-8 md:mb-12 mix-blend-difference text-white">
-                <span class="mask-text"><span>STEUER</span></span>
-                <span class="mask-text"><span class="text-yellow-500">DOKUMENTE</span></span>
+            <!-- Headline -->
+            <h1 class="font-display text-5xl sm:text-6xl md:text-8xl lg:text-[6.5rem] font-medium tracking-tighter leading-[0.95] mb-8 md:mb-12 mix-blend-difference text-white">
+                <span class="mask-text"><span>EINGANGS</span></span>
+                <span class="mask-text"><span class="text-yellow-500">RECHNUNGEN</span></span>
                 <span class="mask-text"><span>AUTOMATISIERT</span></span>
             </h1>
 
+            <!-- Subline + Stats -->
             <div class="flex flex-col md:flex-row items-center justify-between w-full max-w-4xl mx-auto mt-8 md:mt-12 border-t pt-8 opacity-0 animate-fade-up border-white/10">
-                <p class="text-sm text-yellow-400 text-center md:text-left max-w-xs mb-8 md:mb-0">
-                    Verbinde einmal dein E-Mail-Konto. Wir erkennen Rechnungen, kategorisieren sie und bereiten alles für den Steuerberater vor.
+                <p class="text-sm text-yellow-400 text-center md:text-left max-w-sm mb-8 md:mb-0">
+                    Verbinde dein E-Mail-Konto. Beleg.Butler erkennt eingehende Rechnungen, kategorisiert sie vollautomatisch und legt sie zentral für dich im Dashboard ab.
                 </p>
                 <div class="flex gap-12">
                     <div class="text-center md:text-left">
                         <div class="text-2xl font-bold font-display">0 Min</div>
-                        <div class="text-[10px] uppercase tracking-widest text-yellow-500">Manueller Aufwand</div>
+                        <div class="text-[10px] uppercase tracking-widest text-yellow-500">Sortieraufwand</div>
                     </div>
                     <div class="text-center md:text-left">
                         <div class="text-2xl font-bold font-display">100%</div>
-                        <div class="text-[10px] uppercase tracking-widest text-yellow-500">Automatisierung</div>
+                        <div class="text-[10px] uppercase tracking-widest text-yellow-500">Übersicht</div>
                     </div>
                 </div>
             </div>
+
+            <!-- NEU: Direkte Anmeldung (Eingabefeld) -->
+            <div class="w-full max-w-md mt-16 animate-fade-up opacity-0" style="animation-delay: 0.6s;">
+                <form class="relative group" onsubmit="event.preventDefault(); alert('Danke! Du bist auf der Liste.');">
+                    <!-- Glow Effect -->
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                    
+                    <div class="relative flex items-center bg-black rounded-xl p-1 border border-white/10">
+                        <input type="email" placeholder="deine@email.de" class="w-full bg-transparent text-white px-4 py-3 outline-none placeholder:text-white/30 font-medium" required>
+                        <button type="submit" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold uppercase tracking-wider text-xs py-3 px-6 rounded-lg transition-all transform hover:scale-[1.02]">
+                            Beitreten
+                        </button>
+                    </div>
+                </form>
+                <p class="text-center text-[10px] text-white/30 mt-3 uppercase tracking-widest">Early Access Q3 2025 • Kostenlos vormerken</p>
+            </div>
+
         </div>
     </section>
 
@@ -215,12 +249,12 @@ plugins: []
                 <div class="gap-x-4 gap-y-4">
                     <h2 class="text-3xl md:text-4xl lg:text-6xl font-display font-medium mb-4 md:mb-6 text-white">Live Verarbeitung</h2>
                     <p class="text-base md:text-lg text-yellow-400 max-w-lg">
-                        Dein persönlicher Buchhaltungs-Assistent, der niemals schläft. Eingehende Rechnungen werden sofort erkannt und verarbeitet.
+                        Dein persönlicher Rechnungs-Assistent, der niemals schläft. Eingehende E-Mails werden analysiert, Rechnungen extrahiert und zentral gespeichert.
                     </p>
                 </div>
                 <div class="flex items-center gap-2 text-xs font-mono text-white/40 uppercase tracking-widest">
                     <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    System Online
+                    Beleg.Butler Aktiv
                 </div>
             </div>
 
@@ -246,7 +280,7 @@ plugins: []
                             <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-white/20 to-transparent mt-2 mb-2"></div>
                             <div class="flex justify-between items-center text-[11px] text-white/50 font-mono">
                                 <span class="flex items-center gap-1.5">Gmail & Outlook</span>
-                                <span class="flex items-center gap-1.5">2 Neue E-Mails</span>
+                                <span class="flex items-center gap-1.5">2 Neue Rechnungen</span>
                             </div>
                         </div>
                     </div>
@@ -263,7 +297,7 @@ plugins: []
 > Category: Software/Lizenzen
 > Tax: 19%
 > Confidence: 99.8%
-> Status: Matched
+> Status: Categorized
                         </div>
                     </div>
                     
@@ -286,11 +320,15 @@ plugins: []
                     </div>
                 </div>
 
-                <!-- Card 3: Export -->
+                <!-- Card 3: Export (ANIMATED CHECKMARK) -->
                 <div class="group relative aspect-[4/5] md:aspect-[9/16] rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(168,85,247,0.3)] hover:border-purple-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 200ms;">
                     <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center">
-                        <div class="w-16 h-16 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500 shadow-[0_0_30px_rgba(34,197,94,0.4)]">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <!-- Animated Container -->
+                        <div class="w-20 h-20 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500 shadow-[0_0_30px_rgba(34,197,94,0.4)] animate-success">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <!-- Animated Path -->
+                                <polyline points="20 6 9 17 4 12" class="animate-draw" stroke-dasharray="50" stroke-dashoffset="50"></polyline>
+                            </svg>
                         </div>
                     </div>
 
@@ -298,16 +336,16 @@ plugins: []
 
                     <div class="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-1.5">
                         <div class="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></div>
-                        <span class="text-[10px] font-mono font-medium text-white/90 tracking-wider uppercase">Exportbereit</span>
+                        <span class="text-[10px] font-mono font-medium text-white/90 tracking-wider uppercase">Gespeichert</span>
                     </div>
 
                     <div class="absolute bottom-0 left-0 w-full p-6 z-20">
                         <div class="flex flex-col gap-2">
-                            <h3 class="font-display text-lg">Abschluss</h3>
+                            <h3 class="font-display text-lg">Zentrale Ablage</h3>
                             <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-white/20 to-transparent mt-2 mb-2"></div>
                             <div class="flex justify-between items-center text-[11px] text-white/50 font-mono">
-                                <span class="flex items-center gap-1.5">DATEV Export</span>
-                                <span class="flex items-center gap-1.5">Steuerberater Happy</span>
+                                <span class="flex items-center gap-1.5">Im Dashboard</span>
+                                <span class="flex items-center gap-1.5">Steuer-Ready</span>
                             </div>
                         </div>
                     </div>
@@ -321,12 +359,12 @@ plugins: []
         <div class="max-w-7xl mr-auto ml-auto gap-x-4 gap-y-4">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-24">
                 <div class="lg:sticky md:top-32 lg:mb-0 h-fit mb-12 relative top-0">
-                    <h2 class="md:text-5xl lg:text-6xl md:mb-8 text-4xl font-medium text-white tracking-tight font-display mb-6">Dein <br>Autopilot</h2>
+                    <h2 class="md:text-5xl lg:text-6xl md:mb-8 text-4xl font-medium text-white tracking-tight font-display mb-6">Dein <br>Butler</h2>
                     <p class="text-base md:text-lg text-yellow-400 text-justify max-w-md mb-8 md:mb-12">
-                        TaxFlow ersetzt Schuhkartons und Excel-Listen durch eine intelligente KI-Pipeline, die deine Buchhaltung auf Autopilot schaltet.
+                        Beleg.Butler ersetzt Schuhkartons und manuelle Excel-Listen durch eine intelligente Pipeline, die deine Eingangsrechnungen vollautomatisch verwaltet.
                     </p>
                     <ul class="space-y-3 md:space-y-4 text-sm md:text-base">
-                        <li class="flex text-yellow-400 gap-x-4 gap-y-4 items-center font-medium">Automatische Erfassung via E-Mail</li>
+                        <li class="flex text-yellow-400 gap-x-4 gap-y-4 items-center font-medium">Automatische Erfassung aus E-Mails</li>
                         <li class="flex text-yellow-500 gap-x-4 gap-y-4 items-center font-medium">KI-gestützte Kategorisierung</li>
                         <li class="flex text-yellow-500 gap-x-4 gap-y-4 items-center font-medium">Zentrales Archiv & Dashboard</li>
                     </ul>
@@ -374,7 +412,7 @@ plugins: []
                             
                             <div class="card-element relative z-10">
                                 <h3 class="text-2xl md:text-3xl font-medium text-white font-display mb-2 tracking-tight">E-Mail Integration</h3>
-                                <p class="text-yellow-500 max-w-sm text-sm md:text-base">Einmalige Verbindung. Ab dann scannt unser System deinen Posteingang nach Rechnungen, ohne dass du etwas tun musst.</p>
+                                <p class="text-yellow-500 max-w-sm text-sm md:text-base">Einmalige Verbindung. Ab dann scannt Beleg.Butler deinen Posteingang nach Rechnungen, ohne dass du etwas tun musst.</p>
                             </div>
                         </div>
                     </div>
@@ -393,7 +431,7 @@ plugins: []
                                             <div class="w-2.5 h-2.5 rounded-full bg-[#27C93F]/20"></div>
                                         </div>
                                         <div class="text-[9px] font-mono text-white/30 flex items-center gap-2">
-                                            <span>tax_ai.py</span>
+                                            <span>beleg_ai.py</span>
                                             <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
                                         </div>
                                     </div>
@@ -432,81 +470,17 @@ plugins: []
                                     </div>
                                     <!-- Nodes -->
                                     <div class="absolute top-1/4 right-1/4">
-                                        <div class="px-2 py-1 bg-green-500/10 border border-green-500/40 rounded text-[9px] text-green-400">DATEV</div>
+                                        <div class="px-2 py-1 bg-green-500/10 border border-green-500/40 rounded text-[9px] text-green-400">ÜBERSICHT</div>
                                     </div>
                                     <div class="absolute bottom-1/3 left-1/4">
-                                        <div class="px-2 py-1 bg-blue-500/10 border border-blue-500/40 rounded text-[9px] text-blue-400">ELSTER</div>
+                                        <div class="px-2 py-1 bg-blue-500/10 border border-blue-500/40 rounded text-[9px] text-blue-400">ARCHIV</div>
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="card-element relative z-10">
-                                <h3 class="text-2xl md:text-3xl font-medium text-white font-display mb-2 tracking-tight">Zentrales Archiv</h3>
-                                <p class="text-yellow-500 max-w-sm text-sm md:text-base">Alles an einem Ort. Suche nach Beträgen, Daten oder Anbietern in Sekunden. Exportfertig für den Steuerberater.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION 4: TESTIMONIALS -->
-    <section class="md:py-32 md:px-6 overflow-hidden bg-black border-white/10 border-t pt-20 pr-4 pb-20 pl-4 relative" id="testimonials">
-        <div class="z-10 max-w-[1400px] mr-auto ml-auto relative">
-            <div class="text-center mb-12 md:mb-20">
-                <h2 class="text-3xl md:text-6xl font-medium text-white font-display mb-4 md:mb-6 tracking-tight">Kundenstimmen</h2>
-                <p class="uppercase text-xs text-yellow-500 tracking-widest">Stressfrei durch das Steuerjahr</p>
-            </div>
-
-            <!-- Testimonial Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-                <!-- Person 1 -->
-                <div class="group relative rounded-2xl overflow-hidden aspect-[9/16] border border-white/10 bg-[#0A0A0A] transition-transform duration-500 hover:-translate-y-2">
-                    <div class="absolute inset-0 w-full h-full bg-gray-900">
-                         <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80" class="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700">
-                    </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 transition-opacity duration-300"></div>
-                    <div class="absolute bottom-0 left-0 w-full p-6 md:p-8 z-20">
-                        <p class="text-lg text-white mb-4">"Endlich kein Suchen mehr nach fehlenden Belegen. TaxFlow hat mir sicher 5 Stunden im Monat gespart."</p>
-                        <div class="flex items-center gap-4 border-t border-white/10 pt-4">
-                            <div class="">
-                                <div class="text-sm font-medium text-white">Julia M.</div>
-                                <div class="uppercase text-xs text-yellow-500 tracking-wider">Freelancerin</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Person 2 -->
-                <div class="group relative rounded-2xl overflow-hidden aspect-[9/16] border border-white/10 bg-[#0A0A0A] transition-transform duration-500 hover:-translate-y-2 md:-mt-12">
-                     <div class="absolute inset-0 w-full h-full bg-gray-900">
-                         <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&q=80" class="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700">
-                    </div>
-                     <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 transition-opacity duration-300"></div>
-                    <div class="absolute bottom-0 left-0 w-full p-6 md:p-8 z-20">
-                         <p class="text-lg text-white mb-4">"Mein Steuerberater liebt die Exporte. Alles sauber kategorisiert und GoBD konform."</p>
-                        <div class="flex items-center gap-4 border-t border-white/10 pt-4">
-                            <div class="">
-                                <div class="text-sm font-medium text-white">Thomas K.</div>
-                                <div class="text-xs uppercase tracking-wider text-yellow-500">Agentur Inhaber</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Person 3 -->
-                <div class="group relative rounded-2xl overflow-hidden aspect-[9/16] border border-white/10 bg-[#0A0A0A] transition-transform duration-500 hover:-translate-y-2">
-                     <div class="absolute inset-0 w-full h-full bg-gray-900">
-                         <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80" class="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700">
-                    </div>
-                     <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 transition-opacity duration-300"></div>
-                    <div class="absolute bottom-0 left-0 w-full p-6 md:p-8 z-20">
-                         <p class="text-lg text-white mb-4">"Das Dashboard gibt mir endlich einen Überblick über meine Ausgaben in Echtzeit."</p>
-                        <div class="flex items-center gap-4 border-t border-white/10 pt-4">
-                            <div class="">
-                                <div class="text-sm font-medium text-white">Sarah L.</div>
-                                <div class="text-xs uppercase tracking-wider text-yellow-500">Shopify Händlerin</div>
+                                <h3 class="text-2xl md:text-3xl font-medium text-white font-display mb-2 tracking-tight">Zentrales Dashboard</h3>
+                                <p class="text-yellow-500 max-w-sm text-sm md:text-base">Alles an einem Ort. Suche nach Beträgen, Daten oder Anbietern in Sekunden. Jederzeit Exportfertig.</p>
                             </div>
                         </div>
                     </div>
@@ -526,20 +500,20 @@ plugins: []
                 <!-- Brand -->
                 <div class="lg:col-span-1 space-y-6">
                     <a href="#" class="flex items-center gap-3">
-                         <div class="flex overflow-hidden bg-center text-black bg-white w-8 h-8 items-center justify-center rounded-sm font-bold font-display">T</div>
-                        <span class="text-lg font-bold text-white tracking-tight font-display">TAX<span class="font-light text-yellow-500">FLOW</span></span>
+                         <div class="flex overflow-hidden bg-center text-black bg-white w-8 h-8 items-center justify-center rounded-sm font-bold font-display">B</div>
+                        <span class="text-lg font-bold text-white tracking-tight font-display">BELEG.<span class="font-light text-yellow-500">BUTLER</span></span>
                     </a>
                     <p class="text-sm leading-relaxed max-w-xs text-yellow-400">
-                        Die Zukunft der vorbereitenden Buchhaltung für Kleinunternehmer und Selbstständige.
+                        Die Zukunft der vorbereitenden Buchhaltung für Kleinunternehmer.
                     </p>
                 </div>
 
                 <!-- Empty space or extra links -->
                 <div class="lg:col-span-2 hidden lg:block"></div>
 
-                <!-- Waitlist Form -->
+                <!-- Waitlist Form (Footer Duplicate/Backup) -->
                 <div class="lg:col-span-1">
-                    <h4 class="text-xs font-bold uppercase tracking-widest mb-6 text-white">Early Access sichern</h4>
+                    <h4 class="text-xs font-bold uppercase tracking-widest mb-6 text-white">Noch nicht eingetragen?</h4>
                     <form class="relative" onsubmit="event.preventDefault(); alert('Danke! Du stehst auf der Liste.');">
                         <input type="email" placeholder="Deine E-Mail Adresse" required class="focus:outline-none focus:border-yellow-500 transition-colors text-sm text-white bg-white/5 w-full border-white/10 border rounded-lg pt-3 pr-12 pb-3 pl-4">
                         <button type="submit" class="absolute right-2 top-2 p-1 rounded transition-colors bg-white text-black hover:bg-yellow-400">
@@ -552,7 +526,7 @@ plugins: []
 
             <!-- Bottom Bar -->
             <div class="pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4 border-white/10">
-                <div class="text-[10px] uppercase text-yellow-600 tracking-widest text-center md:text-left">© 2025 TaxFlow SaaS. Made in Germany.</div>
+                <div class="text-[10px] uppercase text-yellow-600 tracking-widest text-center md:text-left">© 2025 Beleg.Butler. Made in Germany.</div>
                 <div class="flex gap-6 text-[10px] uppercase tracking-widest text-yellow-600">
                     <a href="#" class="transition-colors hover:text-yellow-400">Impressum</a>
                     <a href="#" class="transition-colors hover:text-yellow-400">Datenschutz</a>
