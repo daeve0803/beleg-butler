@@ -1,882 +1,133 @@
 <!DOCTYPE html>
-<html lang="de" class="bg-[#030303]">
+<html lang="de" class="bg-[#FAF9F6]">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Beleg.Butler | Deine Eingangsrechnungen auf Autopilot</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<!-- GSAP & ScrollTrigger -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-<!-- Lenis (Smooth Scroll) -->
-<script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
-<!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<style>
-:root {
---cursor-size: 12px;
-}
-body {
-font-family: 'Manrope', sans-serif;
-background-color: #030303;
-color: #ffffff;
-overflow-x: hidden;
-margin: 0;
-cursor: none; /* System Cursor verstecken */
-}
-
-/* Fallback für Touch Devices */
-@media (hover: none) {
-    body { cursor: auto; }
-    #context-cursor, #cursor-glow { display: none !important; }
-}
-
-/* --- 1. SPOTLIGHT GLOW (Hintergrund) --- */
-#cursor-glow {
-    position: fixed;
-    top: 0; left: 0;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle closest-side, rgba(250, 204, 21, 0.1), transparent);
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    z-index: 9998; 
-    mix-blend-mode: screen;
-    will-change: left, top;
-    transition: opacity 0.3s ease;
-}
-
-/* --- 2. CONTEXT SHIFTER (Vordergrund) --- */
-#context-cursor {
-    position: fixed;
-    top: 0; left: 0;
-    width: var(--cursor-size); height: var(--cursor-size);
-    background-color: white;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 10000; 
-    transform: translate(-50%, -50%);
-    mix-blend-mode: exclusion; 
-    transition: 
-        width 0.3s cubic-bezier(0.19, 1, 0.22, 1),
-        height 0.3s cubic-bezier(0.19, 1, 0.22, 1),
-        background-color 0.3s ease,
-        border-radius 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    will-change: left, top, width, height;
-}
-
-#context-cursor::after {
-    content: '';
-    opacity: 0;
-    color: black;
-    font-family: 'Manrope', sans-serif;
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: opacity 0.2s ease;
-}
-
-/* --- STATES --- */
-body.cursor-hover #context-cursor {
-    width: 60px; height: 60px;
-    background-color: white;
-    mix-blend-mode: normal; 
-}
-body.cursor-hover #context-cursor::after {
-    content: 'KLICK';
-    opacity: 1;
-}
-
-body.cursor-text #context-cursor {
-    width: 2px; height: 24px;
-    border-radius: 2px;
-    background-color: #FACC15;
-}
-
-body.cursor-scan #context-cursor {
-    width: 80px; height: 80px;
-    background-color: rgba(250, 204, 21, 0.9); 
-    mix-blend-mode: normal;
-    border-radius: 20px; 
-}
-body.cursor-scan #context-cursor::after {
-    content: 'SCAN';
-    color: black;
-    opacity: 1;
-}
-
-body.cursor-ai #context-cursor {
-    width: 80px; height: 80px;
-    background-color: rgba(59, 130, 246, 0.9); 
-    mix-blend-mode: normal;
-    border-radius: 50%;
-}
-body.cursor-ai #context-cursor::after {
-    content: 'ANALYSE';
-    color: white;
-    opacity: 1;
-}
-
-body.cursor-save #context-cursor {
-    width: 80px; height: 80px;
-    background-color: rgba(34, 197, 94, 0.9); 
-    mix-blend-mode: normal;
-    border-radius: 10px;
-}
-body.cursor-save #context-cursor::after {
-    content: 'SICHERN';
-    color: white;
-    opacity: 1;
-}
-
-/* --- TYPOGRAPHY --- */
-.font-display { font-family: 'Space Grotesk', sans-serif; }
-
-/* --- UTILITIES --- */
-.glass {
-background: rgba(255, 255, 255, 0.03);
-backdrop-filter: blur(8px); 
--webkit-backdrop-filter: blur(8px);
-border: 1px solid rgba(255, 255, 255, 0.05);
-}
-.grayscale-img {
-filter: grayscale(100%);
-transition: filter 0.5s ease, transform 0.7s ease;
-}
-.group:hover .grayscale-img {
-filter: grayscale(0%);
-transform: scale(1.05);
-}
-
-/* --- 3D ANIMATIONS --- */
-.card-3d-wrap { perspective: 1000px; }
-.card-3d-inner {
-transform-style: preserve-3d;
-transition: transform 0.1s linear; 
-will-change: transform; 
-}
-.card-element { transform: translateZ(40px); }
-
-/* --- MASK REVEAL --- */
-.mask-text { overflow: hidden; display: block; }
-.mask-text span {
-display: block;
-transform: translateY(110%);
-will-change: transform;
-}
-
-/* --- NOISE TEXTURE --- */
-.bg-noise {
-background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-}
-
-/* --- ANIMATIONS --- */
-@keyframes scan-line {
-0% { top: 0%; opacity: 0; }
-10% { opacity: 1; }
-90% { opacity: 1; }
-100% { top: 100%; opacity: 0; }
-}
-@keyframes code-type {
-0% { width: 0; }
-50% { width: 70%; }
-100% { width: 70%; }
-}
-.animate-type {
-animation: code-type 2s steps(20, end) infinite alternate;
-}
-@keyframes draw-check {
-  0% { stroke-dasharray: 50; stroke-dashoffset: 50; opacity: 0; }
-  20% { opacity: 1; }
-  100% { stroke-dasharray: 50; stroke-dashoffset: 0; opacity: 1; }
-}
-@keyframes success-pulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 rgba(34,197,94,0); }
-  50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(34,197,94,0.3); }
-  100% { transform: scale(1); box-shadow: 0 0 0 rgba(34,197,94,0); }
-}
-.animate-draw {
-    animation: draw-check 2s cubic-bezier(0.65, 0, 0.45, 1) infinite;
-    animation-delay: 1s; 
-}
-.animate-success {
-    animation: success-pulse 2s ease-in-out infinite;
-    animation-delay: 1s;
-}
-
-/* MODAL UTILITIES */
-.modal-backdrop {
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(12px);
-    z-index: 10001; /* Über dem Cursor */
-    cursor: pointer; 
-}
-.modal-content {
-    cursor: default; 
-}
-/* Scrollbar for modal */
-.modal-content::-webkit-scrollbar {
-  width: 8px;
-}
-.modal-content::-webkit-scrollbar-track {
-  background: #1a1a1a; 
-  border-radius: 4px;
-}
-.modal-content::-webkit-scrollbar-thumb {
-  background: #333; 
-  border-radius: 4px;
-}
-.modal-content::-webkit-scrollbar-thumb:hover {
-  background: #555; 
-}
-</style>
-<script>
-tailwind.config = {
-theme: {
-extend: {
-    colors: {
-        yellow: {
-            400: '#FACC15', 
-            500: '#EAB308',
-        }
-    }
-}
-},
-plugins: []
-};
-</script>
-</head>
-<body class="antialiased overflow-x-hidden text-white bg-black relative">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Leo ist dein persönlicher KI-Agent für LinkedIn. Automatische Recherche, Content-Erstellung und Performance-Analyse auf Autopilot.">
+    <meta name="theme-color" content="#0072B1">
     
-    <!-- Unicorn Studio Hintergrund (Die Welle) -->
-    <div class="aura-background-component inset-0 pointer-events-none z-0 fixed saturate-200 hue-rotate-180" data-alpha-mask="80" style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent);">
-        <div class="aura-background-component top-0 w-full -z-10 absolute h-full">
-            <div data-us-project="FixNvEwvWwbu3QX9qC3F" class="absolute w-full h-full left-0 top-0 -z-10"></div>
-            <script type="text/javascript">
-                !function(){if(!window.UnicornStudio){window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js",i.onload=function(){window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)},(document.head || document.body).appendChild(i)}}();
-            </script>
-        </div>
-    </div>
+    <!-- Open Graph / LinkedIn -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://leo-agent.ai/">
+    <meta property="og:title" content="Leo | Dein LinkedIn Wachstum auf Autopilot">
+    <meta property="og:description" content="Kein Stress mehr mit Content. Leo recherchiert Trends, lernt deinen Stil und schreibt virale Posts. Dein Job? Nur noch Genehmigen.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1611944212129-29990460f752?auto=format&fit=crop&q=80&w=1200">
 
-    <!-- 1. GLOW (Unten) -->
-    <div id="cursor-glow"></div>
-    <!-- 2. SHIFTER (Oben) -->
-    <div id="context-cursor"></div>
-
-    <!-- NAVIGATION -->
-    <nav class="fixed transition-transform duration-300 z-50 pt-4 px-4 md:pt-6 md:px-6 top-0 right-0 left-0" id="navbar">
-        <div class="flex flex-col glass max-w-[1600px] rounded-[24px] md:rounded-full mr-auto ml-auto px-4 py-3 md:px-8 items-center justify-between transition-all duration-300">
-            <div class="flex w-full items-center justify-between">
-                <!-- LOGO FIX: Added pointer-events-none to text -->
-                <a href="#" class="flex items-center gap-3 group hover-trigger" data-cursor="hover">
-                    <div class="flex overflow-hidden bg-center text-black bg-white w-7 h-7 md:w-8 md:h-8 items-center justify-center rounded-sm font-bold font-display">
-                        B
-                    </div>
-                    <span class="pointer-events-none text-base md:text-lg font-semibold text-white tracking-tight font-display text-left">BELEG.<span class="font-light text-yellow-500">BUTLER</span></span>
-                </a>
-                
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center gap-12">
-                    <a href="#how-it-works" class="text-xs font-medium uppercase tracking-widest transition-colors hover:text-white text-yellow-400" data-cursor="hover">So geht's</a>
-                    <a href="#features" class="uppercase transition-colors hover:text-white text-xs font-medium text-yellow-400 tracking-widest" data-cursor="hover">Features</a>
-                </div>
-
-                <!-- Right Actions -->
-                <div class="flex items-center gap-4">
-                    <a href="#waitlist" class="uppercase transition-colors cursor-pointer text-xs font-semibold text-black tracking-wider bg-amber-400 rounded-full px-6 py-2 hover:bg-amber-300" data-cursor="hover">WARTELISTE</a>
-                </div>
-            </div>
-
-            <!-- Mobile Menu Dropdown -->
-            <div class="mobile-menu hidden w-full flex-col gap-6 pt-6 pb-4 border-t border-white/10 mt-4 md:hidden animate-fade-in bg-black/50 rounded-b-xl backdrop-blur-xl">
-                <div class="flex flex-col gap-4 items-center">
-                    <a href="#how-it-works" class="text-sm font-medium uppercase tracking-widest text-yellow-400 hover:text-white w-full text-center py-3 border-b border-white/5" onclick="toggleMobileMenu()">So geht's</a>
-                    <a href="#features" class="text-sm font-medium uppercase tracking-widest text-yellow-400 hover:text-white w-full text-center py-3 border-b border-white/5" onclick="toggleMobileMenu()">Features</a>
-                </div>
-                <button class="w-full uppercase transition-colors hover:bg-yellow-200 cursor-pointer text-xs font-semibold text-black tracking-wider bg-amber-400 rounded-full py-4 mt-2" onclick="window.location.href='#waitlist'">ZUR WARTELISTE</button>
-            </div>
-        </div>
-    </nav>
-
-    <!-- SECTION 1: HERO -->
-    <section class="min-h-[100dvh] flex flex-col overflow-hidden z-10 md:px-6 pr-4 pl-4 relative items-center justify-center">
-        <div class="z-0 pointer-events-none bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 absolute top-0 right-0 bottom-0 left-0"></div>
-
-        <div class="z-10 text-center max-w-[1400px] mr-auto ml-auto relative gap-x-12 gap-y-16 flex flex-col items-center">
-            
-            <!-- Headline -->
-            <h1 class="font-display text-5xl sm:text-6xl md:text-8xl lg:text-[6.5rem] font-medium tracking-tighter leading-[0.95] mb-8 md:mb-12 mix-blend-difference text-white mt-24" data-cursor="text">
-                <span class="mask-text"><span>EINGANGS</span></span>
-                <span class="mask-text"><span class="text-yellow-500">RECHNUNGEN</span></span>
-                <span class="mask-text"><span>AUTOMATISIERT</span></span>
-            </h1>
-
-            <!-- Subline + Stats -->
-            <div class="flex flex-col md:flex-row items-center justify-between w-full max-w-4xl mx-auto border-t pt-8 opacity-0 animate-fade-up border-white/10">
-                <p class="text-sm text-yellow-400 text-center md:text-left max-w-sm mb-8 md:mb-0" data-cursor="text">
-                    Verbinde dein E-Mail-Konto. Beleg.Butler erkennt eingehende Rechnungen, kategorisiert sie vollautomatisch und legt sie zentral für dich im Dashboard ab.
-                </p>
-                <div class="flex gap-12">
-                    <div class="text-center md:text-left">
-                        <div class="text-2xl font-bold font-display">0 Min</div>
-                        <div class="text-[10px] uppercase tracking-widest text-yellow-500">Sortieraufwand</div>
-                    </div>
-                    <div class="text-center md:text-left">
-                        <div class="text-2xl font-bold font-display">100%</div>
-                        <div class="text-[10px] uppercase tracking-widest text-yellow-500">Übersicht</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- NEU: Direkte Anmeldung (Eingabefeld) MIT Badge darüber -->
-            <div class="w-full max-w-md mt-16 mb-12 animate-fade-up opacity-0 flex flex-col items-center gap-4" style="animation-delay: 0.6s;">
-                
-                <!-- Badge (Cursor Neutralized) -->
-                <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full border backdrop-blur-md opacity-100 animate-fade-in border-white/10 bg-white/5 cursor-default">
-                    <span class="w-1.5 h-1.5 rounded-full animate-pulse bg-white"></span>
-                    <span class="text-[10px] uppercase font-medium tracking-[0.2em] text-yellow-300">Warteliste geöffnet</span>
-                </div>
-
-                <form class="relative group w-full" onsubmit="event.preventDefault(); alert('Danke! Du bist auf der Liste.');">
-                    <!-- Glow Effect -->
-                    <div class="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-                    
-                    <div class="relative flex items-center bg-black rounded-xl p-1 border border-white/10">
-                        <input type="email" placeholder="deine@email.de" class="w-full bg-transparent text-white px-4 py-3 outline-none placeholder:text-white/30 font-medium" required data-cursor="text">
-                        <button type="submit" class="bg-yellow-500 hover:bg-yellow-400 text-black font-bold uppercase tracking-wider text-xs py-3 px-6 rounded-lg transition-all transform hover:scale-[1.02] cursor-pointer" data-cursor="hover">
-                            Beitreten
-                        </button>
-                    </div>
-                </form>
-                <p class="text-center text-[10px] text-white/30 uppercase tracking-widest">Early Access Q1 2026 • Kostenlos vormerken</p>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- SECTION 2: LIVE DASHBOARD / FEED -->
-    <section class="md:py-32 md:px-6 bg-[#030303] border-white/5 border-t pt-20 pr-4 pb-20 pl-4 relative" id="how-it-works">
-        <div class="z-10 max-w-[1400px] mr-auto ml-auto relative">
-            <div class="flex flex-col md:flex-row md:items-end md:mb-16 gap-6 md:gap-8 mb-16 items-start justify-between">
-                <div class="gap-x-4 gap-y-4">
-                    <h2 class="text-3xl md:text-4xl lg:text-6xl font-display font-medium mb-4 md:mb-6 text-white">Live Verarbeitung</h2>
-                    <p class="text-base md:text-lg text-yellow-400 max-w-lg" data-cursor="text">
-                        Dein persönlicher Rechnungs-Assistent, der niemals schläft. Eingehende E-Mails werden analysiert, Rechnungen extrahiert und zentral gespeichert.
-                    </p>
-                </div>
-                <div class="flex items-center gap-2 text-xs font-mono text-white/40 uppercase tracking-widest">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    Beleg.Butler Aktiv
-                </div>
-            </div>
-
-            <!-- COMPACT GRID (aspect-square) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+    <title>Leo | Dein LinkedIn Wachstum auf Autopilot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-                <!-- Card 1: Scanning -->
-                <div class="group hover-trigger relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)] hover:border-yellow-500/50 transition-all duration-500 hover:-translate-y-2" data-cursor="scan">
-                    <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center overflow-hidden">
-                        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80')] bg-cover opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700"></div>
-                        <div class="w-full h-1 bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,1)] absolute top-0 animate-[scan-line_3s_linear_infinite]"></div>
-                    </div>
-                    
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 pointer-events-none"></div>
-
-                    <div class="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-1.5">
-                        <div class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></div>
-                        <span class="text-[10px] font-mono font-medium text-white/90 tracking-wider uppercase">Scannt...</span>
-                    </div>
-
-                    <div class="absolute bottom-0 left-0 w-full p-6 z-20">
-                        <div class="flex flex-col gap-2">
-                            <h3 class="font-display text-lg">Posteingang</h3>
-                            <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-white/20 to-transparent mt-2 mb-2"></div>
-                            <div class="flex justify-between items-center text-[11px] text-white/50 font-mono">
-                                <span class="flex items-center gap-1.5">Gmail & Outlook</span>
-                                <span class="flex items-center gap-1.5">2 Neue Rechnungen</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 2: AI Processing -->
-                <div class="group hover-trigger relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:border-blue-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 100ms;" data-cursor="ai">
-                    <div class="absolute inset-0 w-full h-full bg-gray-900 font-mono text-[10px] text-blue-400 p-4 opacity-60 overflow-hidden">
-                        <div class="animate-type whitespace-pre-wrap">
-> Analyzing Invoice #2024-89
-> Detected: Adobe Systems
-> Amount: € 59,99
-> Date: 12.01.2025
-> Category: Software/Lizenzen
-> Tax: 19%
-> Confidence: 99.8%
-> Status: Categorized
-                        </div>
-                    </div>
-                    
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 pointer-events-none"></div>
-
-                    <div class="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-1.5">
-                        <div class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></div>
-                        <span class="text-[10px] font-mono font-medium text-white/90 tracking-wider uppercase">KI-Analyse</span>
-                    </div>
-
-                    <div class="absolute bottom-0 left-0 w-full p-6 z-20">
-                        <div class="flex flex-col gap-2">
-                            <h3 class="font-display text-lg">Kategorisierung</h3>
-                            <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-white/20 to-transparent mt-2 mb-2"></div>
-                            <div class="flex justify-between items-center text-[11px] text-white/50 font-mono">
-                                <span class="flex items-center gap-1.5">Auto-Match</span>
-                                <span class="flex items-center gap-1.5">99.9% Genauigkeit</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 3: Export -->
-                <div class="group hover-trigger relative aspect-[4/5] md:aspect-square rounded-2xl overflow-hidden bg-[#0A0A0A] border border-white/10 cursor-pointer shadow-lg hover:shadow-[0_0_40px_-10px_rgba(34,197,94,0.3)] hover:border-green-500/50 transition-all duration-500 hover:-translate-y-2" style="transition-delay: 200ms;" data-cursor="save">
-                    <div class="absolute inset-0 w-full h-full bg-gray-900 flex items-center justify-center">
-                        <!-- Animated Container -->
-                        <div class="w-20 h-20 rounded-full border-2 border-green-500 flex items-center justify-center text-green-500 shadow-[0_0_30px_rgba(34,197,94,0.4)] animate-success">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                                <!-- Animated Path -->
-                                <polyline points="20 6 9 17 4 12" class="animate-draw" stroke-dasharray="50" stroke-dashoffset="50"></polyline>
-                            </svg>
-                        </div>
-                    </div>
-
-                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 pointer-events-none"></div>
-
-                    <div class="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 flex items-center gap-1.5">
-                        <!-- GREEN DOT -->
-                        <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                        <span class="text-[10px] font-mono font-medium text-white/90 tracking-wider uppercase">Gespeichert</span>
-                    </div>
-
-                    <div class="absolute bottom-0 left-0 w-full p-6 z-20">
-                        <div class="flex flex-col gap-2">
-                            <h3 class="font-display text-lg">Zentrale Ablage</h3>
-                            <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-white/20 to-transparent mt-2 mb-2"></div>
-                            <div class="flex justify-between items-center text-[11px] text-white/50 font-mono">
-                                <span class="flex items-center gap-1.5">Im Dashboard</span>
-                                <span class="flex items-center gap-1.5">Steuer-Ready</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION 3: 3D SERVICES / DETAILS -->
-    <section class="z-10 bg-[#050509] border-white/5 border-t pt-16 md:pt-40 px-4 md:px-6 pb-0 relative" id="features">
-        <div class="max-w-7xl mr-auto ml-auto gap-x-4 gap-y-4">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-24">
-                <div class="lg:sticky md:top-32 lg:mb-0 h-fit mb-12 relative top-0">
-                    <h2 class="md:text-5xl lg:text-6xl md:mb-8 text-4xl font-medium text-white tracking-tight font-display mb-6">Dein <br>Butler</h2>
-                    <p class="text-base md:text-lg text-yellow-400 text-justify max-w-md mb-8 md:mb-12" data-cursor="text">
-                        Beleg.Butler ersetzt Schuhkartons und manuelle Excel-Listen durch eine intelligente Pipeline, die deine Eingangsrechnungen vollautomatisch verwaltet.
-                    </p>
-                    <ul class="space-y-3 md:space-y-4 text-sm md:text-base">
-                        <li class="flex text-yellow-400 gap-x-4 gap-y-4 items-center font-medium">Automatische Erfassung aus E-Mails</li>
-                        <li class="flex text-yellow-500 gap-x-4 gap-y-4 items-center font-medium">KI-gestützte Kategorisierung</li>
-                        <li class="flex text-yellow-500 gap-x-4 gap-y-4 items-center font-medium">Zentrales Archiv & Dashboard</li>
-                    </ul>
-                </div>
-
-                <div class="flex flex-col gap-8 md:gap-12 pb-16">
-                    
-                    <!-- Card 1: CONNECT -->
-                    <div class="card-3d-wrap group h-auto min-h-[400px] md:h-[450px] w-full cursor-pointer hover-trigger" data-cursor="scan">
-                        <div class="card-3d-inner relative w-full h-full border rounded-2xl p-4 md:p-10 flex flex-col justify-between shadow-2xl overflow-hidden bg-noise default border-white/10">
-                            
-                            <!-- Visual: Data Flow -->
-                            <div class="card-element relative w-full h-48 md:h-64 border bg-[#0f0f0f]/80 backdrop-blur-sm rounded-xl overflow-hidden mb-6 flex items-center justify-center border-white/10">
-                                <svg class="absolute inset-0 w-full h-full z-0 pointer-events-none" preserveAspectRatio="none" viewBox="0 0 400 256">
-                                    <path d="M70 85 C 130 85, 130 128, 200 128" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-dasharray="4 4"></path>
-                                    <path d="M70 171 C 130 171, 130 128, 200 128" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" stroke-dasharray="4 4"></path>
-                                    <path d="M200 128 C 270 128, 270 128, 330 128" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"></path>
-                                    <circle r="2" fill="#eab308" class="opacity-80">
-                                        <animateMotion repeatCount="indefinite" dur="3s" keyPoints="0;1" keyTimes="0;1" path="M70 85 C 130 85, 130 128, 200 128"></animateMotion>
-                                    </circle>
-                                </svg>
-
-                                <div class="relative z-10 w-full h-full flex items-center justify-between px-2 md:px-10">
-                                    <div class="flex flex-col gap-4 md:gap-10">
-                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-[#0A0A0A] border border-white/10">
-                                            <span class="text-xs font-bold text-blue-400">G</span>
-                                            <div class="hidden sm:block text-[9px] uppercase">Gmail</div>
-                                        </div>
-                                        <div class="flex items-center gap-3 p-2 rounded-lg bg-[#0A0A0A] border border-white/10">
-                                            <span class="text-xs font-bold text-blue-600">O</span>
-                                            <div class="hidden sm:block text-[9px] uppercase">Outlook</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1a1a1a] to-black border border-white/20 flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-white"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                                    </div>
-
-                                    <div class="flex items-center gap-3 p-2 rounded-lg bg-[#0A0A0A] border border-white/10">
-                                        <span class="text-xs font-bold text-green-500">✓</span>
-                                        <div class="hidden sm:block text-[9px] uppercase">Erfasst</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="card-element relative z-10">
-                                <h3 class="text-2xl md:text-3xl font-medium text-white font-display mb-2 tracking-tight">E-Mail Integration</h3>
-                                <p class="text-yellow-500 max-w-sm text-sm md:text-base">Einmalige Verbindung. Ab dann scannt Beleg.Butler deinen Posteingang nach Rechnungen, ohne dass du etwas tun musst.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card 2: AI ENGINE -->
-                    <div class="card-3d-wrap group cursor-pointer hover-trigger w-full h-auto min-h-[400px] md:h-[450px]" data-cursor="ai">
-                        <div class="card-3d-inner relative w-full h-full border rounded-2xl p-4 md:p-10 flex flex-col justify-between shadow-2xl overflow-hidden bg-noise default border-white/10">
-                            
-                            <!-- Visual: Terminal -->
-                            <div class="card-element w-full h-48 md:h-64 mb-6 relative perspective-1000">
-                                <div class="w-full h-full bg-[#050505] border border-white/10 rounded-xl overflow-hidden flex flex-col shadow-2xl relative group hover:-translate-y-1 transition-transform duration-500">
-                                    <div class="h-8 border-b border-white/5 flex items-center px-4 bg-white/[0.02] justify-between">
-                                        <div class="flex gap-1.5">
-                                            <div class="w-2.5 h-2.5 rounded-full bg-[#FF5F56]/20"></div>
-                                            <div class="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]/20"></div>
-                                            <div class="w-2.5 h-2.5 rounded-full bg-[#27C93F]/20"></div>
-                                        </div>
-                                        <div class="text-[9px] font-mono text-white/30 flex items-center gap-2">
-                                            <span>beleg_ai.py</span>
-                                            <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                        </div>
-                                    </div>
-                                    <div class="flex-1 p-4 font-mono text-[10px] text-green-400/80 leading-relaxed overflow-hidden">
-                                        <div class="animate-pulse">
-                                            > Initializing OCR module...<br>
-                                            > Reading file: invoice_hosting.pdf<br>
-                                            > Extracting: 12.03.2025 | € 240,00<br>
-                                            > Match found: Hosting / IT-Infrastruktur<br>
-                                            > Tax rate: 19% (Reverse Charge check)<br>
-                                            > Status: Validated.<br>
-                                            > Saving to database...<br>
-                                            <span class="text-white">_</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="card-element relative z-10">
-                                <h3 class="text-2xl md:text-3xl font-medium text-white font-display mb-2 tracking-tight">Intelligente Kategorisierung</h3>
-                                <p class="text-yellow-500 max-w-sm text-sm md:text-base">Unsere KI versteht den Kontext. Software-Abo? Reisekosten? Bewirtung? Alles wird korrekt verbucht.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Card 3: CENTRAL HUB -->
-                    <div class="card-3d-wrap group cursor-pointer hover-trigger w-full h-auto min-h-[400px] md:h-[450px]" data-cursor="save">
-                        <div class="card-3d-inner flex flex-col overflow-hidden default w-full h-full border-white/10 border rounded-2xl p-4 md:p-10 relative shadow-2xl justify-between">
-                            
-                            <!-- Visual: Hub -->
-                            <div class="card-element relative w-full h-48 md:h-64 border bg-[#050505]/80 backdrop-blur-sm rounded-xl overflow-hidden mb-6 flex items-center justify-center border-white/10">
-                                <div class="relative w-full h-full flex items-center justify-center scale-75 md:scale-100">
-                                    <div class="absolute border rounded-full border-white/5 w-64 h-64 animate-[spin_20s_linear_infinite]"></div>
-                                    <div class="relative z-10 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-                                    </div>
-                                    <!-- Nodes -->
-                                    <div class="absolute top-1/4 right-1/4">
-                                        <div class="px-2 py-1 bg-green-500/10 border border-green-500/40 rounded text-[9px] text-green-400">ÜBERSICHT</div>
-                                    </div>
-                                    <div class="absolute bottom-1/3 left-1/4">
-                                        <div class="px-2 py-1 bg-blue-500/10 border border-blue-500/40 rounded text-[9px] text-blue-400">ARCHIV</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="card-element relative z-10">
-                                <h3 class="text-2xl md:text-3xl font-medium text-white font-display mb-2 tracking-tight">Zentrales Dashboard</h3>
-                                <p class="text-yellow-500 max-w-sm text-sm md:text-base">Alles an einem Ort. Suche nach Beträgen, Daten oder Anbietern in Sekunden. Jederzeit Exportfertig.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION 5: WAITLIST / FOOTER -->
-    <footer class="relative overflow-hidden bg-[#050509] border-t pt-16 md:pt-24 pb-8 md:pb-12 border-white/5" id="waitlist">
-        <!-- Decoration -->
-        <div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent to-transparent opacity-50 via-white/20"></div>
-        <div class="absolute -top-[150px] left-1/2 -translate-x-1/2 w-[300px] md:w-[600px] h-[300px] blur-[80px] rounded-full pointer-events-none mix-blend-screen bg-white/5"></div>
-
-        <div class="max-w-[1400px] mx-auto px-4 md:px-6 relative z-10">
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-12 mb-16 md:mb-20">
-                <!-- Brand -->
-                <div class="lg:col-span-1 space-y-6">
-                    <a href="#" class="flex items-center gap-3" data-cursor="hover">
-                         <div class="flex overflow-hidden bg-center text-black bg-white w-8 h-8 items-center justify-center rounded-sm font-bold font-display">B</div>
-                        <span class="text-lg font-bold text-white tracking-tight font-display">BELEG.<span class="font-light text-yellow-500">BUTLER</span></span>
-                    </a>
-                    <p class="text-sm leading-relaxed max-w-xs text-yellow-400" data-cursor="text">
-                        Die Zukunft der vorbereitenden Buchhaltung für Kleinunternehmer.
-                    </p>
-                </div>
-
-                <!-- Empty space or extra links -->
-                <div class="lg:col-span-2 hidden lg:block"></div>
-
-                <!-- Waitlist Form (Footer Duplicate/Backup) -->
-                <div class="lg:col-span-1">
-                    <h4 class="text-xs font-bold uppercase tracking-widest mb-6 text-white">Noch nicht eingetragen?</h4>
-                    <form class="relative" onsubmit="event.preventDefault(); alert('Danke! Du stehst auf der Liste.');">
-                        <input type="email" placeholder="Deine E-Mail Adresse" required class="focus:outline-none focus:border-yellow-500 transition-colors text-sm text-white bg-white/5 w-full border-white/10 border rounded-lg pt-3 pr-12 pb-3 pl-4" data-cursor="text">
-                        <button type="submit" class="absolute right-2 top-2 p-1 rounded transition-colors bg-white text-black hover:bg-yellow-400 cursor-pointer" data-cursor="hover">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[16px] h-[16px]"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                        </button>
-                    </form>
-                    <p class="text-[10px] text-white/30 mt-2">Wir starten in Q1 2026. Kein Spam.</p>
-                </div>
-            </div>
-
-            <!-- Bottom Bar -->
-            <div class="pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4 border-white/10">
-                <div class="text-[10px] uppercase text-yellow-600 tracking-widest text-center md:text-left">© 2026 Beleg.Butler. Made in Germany.</div>
-                <div class="flex gap-6 text-[10px] uppercase tracking-widest text-yellow-600">
-                    <button onclick="document.getElementById('modal-impressum').classList.remove('hidden')" class="hover:text-yellow-400 transition-colors" data-cursor="hover">Impressum</button>
-                    <button onclick="document.getElementById('modal-datenschutz').classList.remove('hidden')" class="hover:text-yellow-400 transition-colors" data-cursor="hover">Datenschutz</button>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- MODAL: IMPRESSUM -->
-    <!-- click event added to backdrop to close modal -->
-    <div id="modal-impressum" class="hidden fixed inset-0 z-[100] flex items-center justify-center modal-backdrop p-4" onclick="if(event.target === this) this.classList.add('hidden')">
-        <!-- data-lenis-prevent added to allow native scroll inside modal -->
-        <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-8 relative shadow-2xl modal-content" data-lenis-prevent>
-            <button onclick="document.getElementById('modal-impressum').classList.add('hidden')" class="absolute top-4 right-4 text-white/50 hover:text-white" data-cursor="hover">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-            <h2 class="text-2xl font-display font-bold text-white mb-6">Impressum</h2>
-            <div class="space-y-4 text-sm text-gray-300">
-                <p>Willkommen bei Beleg.Butler (ein Angebot von Simple.Grow).</p>
-                <p><strong>Angaben gemäß § 5 DDG:</strong><br>
-                SimpleGrow (Inhaber: David Proga)<br>
-                c/o Impressumservice Dein-Impressum<br>
-                Stettiner Straße 41<br>
-                35410 Hungen<br>
-                (Bitte versenden Sie keine Pakete an diese Adresse)</p>
-
-                <p><strong>Kontakt:</strong><br>
-                Telefon: +49 (0) 174 6629095<br>
-                E-Mail: david.proga@simplegrow.io<br>
-                Vertreten durch: David Proga</p>
-
-                <p><strong>EU-Streitschlichtung:</strong><br>
-                Die Europäische Kommission stellt eine Plattform für die Online-Streitbeilegung (OS) bereit: <a href="https://ec.europa.eu/consumers/odr/" target="_blank" class="underline">https://ec.europa.eu/consumers/odr/</a>.<br>
-                Meine E-Mail-Adresse finden Sie oben im Impressum.</p>
-
-                <p><strong>Verbraucherstreitbeilegung/Universalschlichtungsstelle:</strong><br>
-                Ich bin nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
-
-                <p><strong>Haftung für Inhalte:</strong><br>
-                Als Diensteanbieter bin ich gemäß § 7 Abs.1 DDG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG bin ich als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen...</p>
-                
-                <p><strong>Urheberrecht:</strong><br>
-                Die durch den Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: DATENSCHUTZ -->
-    <!-- click event added to backdrop to close modal -->
-    <div id="modal-datenschutz" class="hidden fixed inset-0 z-[100] flex items-center justify-center modal-backdrop p-4" onclick="if(event.target === this) this.classList.add('hidden')">
-        <!-- data-lenis-prevent added here as well -->
-        <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-8 relative shadow-2xl modal-content" data-lenis-prevent>
-            <button onclick="document.getElementById('modal-datenschutz').classList.add('hidden')" class="absolute top-4 right-4 text-white/50 hover:text-white" data-cursor="hover">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-            <h2 class="text-2xl font-display font-bold text-white mb-6">Datenschutzerklärung</h2>
-            <div class="space-y-4 text-sm text-gray-300">
-                <h3 class="font-bold text-white mt-4">1. Verantwortlicher</h3>
-                <p>Verantwortlich für die Datenverarbeitung ist:<br>
-                David Proga<br>
-                SimpleGrow<br>
-                Stettiner Str. 41, 35410 Hungen<br>
-                E-Mail: david.proga@simplegrow.io</p>
-
-                <h3 class="font-bold text-white mt-4">2. Gegenstand</h3>
-                <p>Diese Datenschutzerklärung informiert über die Verarbeitung personenbezogener Daten bei Nutzung von "Beleg.Butler". Beleg.Butler ist ein SaaS-Dienst zur automatisierten Erfassung, Analyse (OCR) und Kategorisierung von Eingangsrechnungen per E-Mail-Integration.</p>
-
-                <h3 class="font-bold text-white mt-4">3. Art der verarbeiteten Daten</h3>
-                <p>Im Rahmen der Nutzung verarbeite ich insbesondere:</p>
-                <ul class="list-disc ml-5 space-y-1">
-                    <li>Kontaktdaten (Name, E-Mail-Adresse)</li>
-                    <li>Finanz- & Rechnungsdaten (IBAN, Steuernummern, Beträge, Händlerdaten)</li>
-                    <li>Metadaten aus E-Mails (Absender, Zeitstempel)</li>
-                    <li>Dateianhänge (PDF, Bilddateien von Belegen)</li>
-                </ul>
-
-                <h3 class="font-bold text-white mt-4">4. Zweck & Rechtsgrundlage</h3>
-                <p>Die Verarbeitung erfolgt zur Vertragserfüllung (Bereitstellung des Dienstes, Analyse der Belege) gemäß Art. 6 Abs. 1 lit. b DSGVO sowie zur Wahrung berechtigter Interessen (Sicherheit, Optimierung) gemäß Art. 6 Abs. 1 lit. f DSGVO.</p>
-
-                <h3 class="font-bold text-white mt-4">5. Eingesetzte Technologien & Auftragsverarbeiter</h3>
-                <p>Ich setze folgende Dienstleister ein, um den Service zu erbringen. Alle Anbieter wurden sorgfältig ausgewählt, um höchste DSGVO-Standards zu erfüllen:</p>
-                
-                <p><strong>Microsoft Azure OpenAI Service:</strong><br>
-                Zur Extraktion von Daten aus Rechnungsdokumenten (OCR/KI-Analyse). Die Verarbeitung erfolgt ausschließlich auf Servern in <strong>Deutschland/Europa</strong>. Es werden nur die notwendigen Daten übermittelt. Keine Nutzung der Daten zum Training der Modelle durch Microsoft.</p>
-
-                <p><strong>n8n / Make.com:</strong><br>
-                Zur Automatisierung der Workflows. Ich nutze ausschließlich Serverstandorte innerhalb der <strong>Europäischen Union (EU)</strong>, um die DSGVO-Konformität sicherzustellen.</p>
-
-                <p><strong>Supabase:</strong><br>
-                Zur Speicherung und Bereitstellung der extrahierten Daten für den Nutzer (Dashboard-Datenbank). Hosting erfolgt in <strong>Deutschland/EU</strong> (AWS Frankfurt).</p>
-
-                <p><strong>E-Mail Provider:</strong><br>
-                Zur Entgegennahme der weitergeleiteten Rechnungen.</p>
-
-                <h3 class="font-bold text-white mt-4">6. Datensicherheit & Verantwortung</h3>
-                <p>Die rechtliche Verantwortung für die Aufbewahrung der Belege (GoBD) verbleibt beim Nutzer. Beleg.Butler dient als technisches Hilfsmittel zur Vorbereitung.</p>
-
-                <h3 class="font-bold text-white mt-4">7. Speicherdauer & Rechte</h3>
-                <p>Ich speichere Daten nur so lange wie nötig. Sie haben das Recht auf Auskunft, Löschung und Berichtigung Ihrer Daten. Kontaktieren Sie mich hierfür unter der oben genannten E-Mail.</p>
-
-                <hr class="border-white/10 my-6">
-
-                <h2 class="text-xl font-display font-bold text-white mb-4">Auftragsverarbeitungsvertrag (AVV) – Information</h2>
-                <p>Da Beleg.Butler personenbezogene Daten (u.a. von Ihren Lieferanten auf den Rechnungen) in Ihrem Auftrag verarbeitet, agiere ich als Auftragsverarbeiter gemäß Art. 28 DSGVO.</p>
-                <p>Ich verpflichte mich zur Einhaltung aller Vorgaben der DSGVO, insbesondere:</p>
-                <ul class="list-disc ml-5 space-y-1">
-                    <li>Verarbeitung nur auf Weisung</li>
-                    <li>Verpflichtung auf Vertraulichkeit</li>
-                    <li>Einsatz technischer Schutzmaßnahmen (Verschlüsselung)</li>
-                    <li>Unterstützung bei Betroffenenrechten</li>
-                </ul>
-                <p>Detaillierte AVV-Verträge werden bei Vertragsabschluss (Start der Beta/Live-Betrieb) bereitgestellt.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- SCRIPTS -->
     <script>
-        // 1. LIGHTER SMOOTH SCROLL CONFIG
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            direction: 'vertical',
-            gestureDirection: 'vertical',
-            smooth: true,
-            mouseMultiplier: 1, 
-            smoothTouch: false,
-            touchMultiplier: 2,
-        })
-
-        function raf(time) {
-            lenis.raf(time)
-            requestAnimationFrame(raf)
-        }
-        requestAnimationFrame(raf)
-
-        // Connect GSAP to Lenis
-        gsap.registerPlugin(ScrollTrigger);
-        
-        // 2. CONTEXT SHIFTER + GLOW CURSOR LOGIC
-        if (window.matchMedia("(pointer: fine)").matches) {
-            const cursor = document.getElementById('context-cursor');
-            const glow = document.getElementById('cursor-glow');
-            const body = document.body;
-            
-            document.addEventListener('mousemove', (e) => {
-                // Beide Cursors positionieren (0 Latenz)
-                const x = e.clientX + 'px';
-                const y = e.clientY + 'px';
-                
-                cursor.style.left = x;
-                cursor.style.top = y;
-                
-                glow.style.left = x;
-                glow.style.top = y;
-                glow.style.opacity = '1';
-            });
-
-            document.addEventListener('mouseleave', () => {
-                glow.style.opacity = '0';
-            });
-
-            // Generic Hover Handler
-            const handleHover = (selector, stateClass) => {
-                document.querySelectorAll(selector).forEach(el => {
-                    el.addEventListener('mouseenter', () => body.classList.add(stateClass));
-                    el.addEventListener('mouseleave', () => body.classList.remove(stateClass));
-                });
-            };
-
-            // Setup Contexts
-            handleHover('a, button, .hover-trigger, [data-cursor="hover"]', 'cursor-hover');
-            handleHover('p, h1, h2, h3, span, input, [data-cursor="text"]', 'cursor-text');
-            handleHover('[data-cursor="scan"]', 'cursor-scan');
-            handleHover('[data-cursor="ai"]', 'cursor-ai');
-            handleHover('[data-cursor="save"]', 'cursor-save');
-        }
-
-        // 4. Hero Text Mask Animation
-        const headings = document.querySelectorAll('.mask-text span');
-        headings.forEach((h, i) => {
-            gsap.to(h, {
-                y: 0,
-                duration: 1.2,
-                ease: "power3.out",
-                delay: i * 0.1
-            });
-        });
-
-        gsap.to(".animate-fade-in", { opacity: 1, duration: 1, delay: 0.5 });
-        gsap.to(".animate-fade-up", { opacity: 1, y: 0, duration: 1, delay: 0.8, ease: "power2.out" });
-
-        // 5. 3D Card Tilt
-        if (window.matchMedia("(hover: hover)").matches) {
-            const cards3d = document.querySelectorAll('.card-3d-wrap');
-            
-            cards3d.forEach(card => {
-                let rect, centerX, centerY;
-                const inner = card.querySelector('.card-3d-inner');
-
-                card.addEventListener('mouseenter', () => {
-                    rect = card.getBoundingClientRect();
-                    centerX = rect.width / 2;
-                    centerY = rect.height / 2;
-                });
-
-                card.addEventListener('mousemove', (e) => {
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const rotateX = ((y - centerY) / centerY) * -5; 
-                    const rotateY = ((x - centerX) / centerX) * 5;  
-                    
-                    requestAnimationFrame(() => {
-                        inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-                    });
-                });
-
-                card.addEventListener('mouseleave', () => {
-                    inner.style.transform = `rotateX(0deg) rotateY(0deg)`;
-                });
-            });
-        }
-        
-        function toggleMobileMenu() {
-            const menu = document.querySelector('.mobile-menu');
-            menu.classList.toggle('hidden');
-            menu.classList.toggle('flex');
-        }
-
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        linkedin: {
+                            DEFAULT: '#0072B1',
+                            light: '#00A0DC',
+                            dark: '#004182',
+                        },
+                        eggshell: '#FAF9F6',
+                        dark: '#1e293b'
+                    },
+                    fontFamily: {
+                        sans: ['Manrope', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 1s ease-out forwards',
+                        'fade-up': 'fadeUp 1s ease-out forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'scan-line': 'scan-line 3s linear infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        fadeUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        'scan-line': {
+                            '0%': { top: '0%', opacity: '0' },
+                            '10%': { opacity: '1' },
+                            '90%': { opacity: '1' },
+                            '100%': { top: '100%', opacity: '0' },
+                        }
+                    }
+                }
+            }
+        };
     </script>
-
+    <style>
+        :root {
+            --cursor-size: 12px;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #FAF9F6;
+            color: #1e293b;
+            overflow-x: hidden;
+            margin: 0;
+            cursor: none;
+        }
+        /* Fallback for Touch Devices */
+        @media (hover: none) {
+            body { cursor: auto; }
+            #context-cursor, #cursor-glow { display: none !important; }
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+        }
+        .glass-high-contrast {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 114, 177, 0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .mask-text { overflow: hidden; display: block; }
+        .mask-text span {
+            display: block;
+            transform: translateY(110%);
+            will-change: transform;
+        }
+        .bg-noise {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+        }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FAF9F6; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "gsap/": "https://esm.sh/gsap@^3.14.2/",
+    "gsap": "https://esm.sh/gsap@^3.14.2",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="antialiased overflow-x-hidden text-slate-800 bg-eggshell relative">
+    <div id="root"></div>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <!-- Explicit entry point for production builds -->
+    <script type="module" src="/index.tsx"></script>
 </body>
 </html>
